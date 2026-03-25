@@ -1,6 +1,6 @@
 {
-  "name": "backend",
-  "version": "0.0.1",
+  "name": "@e-com/backend",
+  "version": "0.1.0",
   "description": "",
   "author": "",
   "private": true,
@@ -27,6 +27,7 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
+    "@e-com/shared": "*",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@nestjs/cli": "^11.0.0",
