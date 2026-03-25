@@ -1,0 +1,26 @@
+{
+  "name": "e-com",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev -w @e-com/frontend",
+    "dev:backend": "npm run start:dev -w @e-com/backend",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:frontend": "npm run test -w @e-com/frontend",
+    "test:backend": "npm run test -w @e-com/backend",
+    "test:e2e": "npm run test:e2e -w @e-com/backend",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}
