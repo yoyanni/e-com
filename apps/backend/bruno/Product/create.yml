@@ -1,0 +1,26 @@
+info:
+  name: create
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/products"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Wireless Noise-Cancelling Headphones",
+        "description": "Over-ear headphones with active noise cancellation and 30-hour battery life.",
+        "price": 79.99,
+        "stock": 50,
+        "imageUrl": "https://example.com/images/headphones.jpg",
+        "categoryId": "16ad2b8c-defb-4556-b3eb-28e00178dc57"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
