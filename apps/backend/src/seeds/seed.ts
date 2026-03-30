@@ -7,6 +7,7 @@ import { Product } from '../entities/product.entity';
 import { CartItem } from '../entities/cart-item.entity';
 import { Order } from '../entities/order.entity';
 import { OrderItem } from '../entities/order-item.entity';
+import { slugify } from 'src/utils/slugify';
 
 config();
 
@@ -18,13 +19,6 @@ const dataSource = new DataSource({
 
 const NUM_CATEGORIES = 10;
 const NUM_PRODUCTS = 50;
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-}
 
 async function seed() {
   const { faker } = await import('@faker-js/faker');
@@ -57,8 +51,9 @@ async function seed() {
   const products = Array.from({ length: NUM_PRODUCTS }, () => {
     const name = faker.commerce.productName();
     let slug = slugify(name);
+    let suffix = 1;
     while (usedSlugs.has(slug)) {
-      slug = slugify(`${name}-${faker.string.alphanumeric(4)}`);
+      slug = slugify(`${name}-${suffix++}`);
     }
     usedSlugs.add(slug);
 
