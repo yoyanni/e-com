@@ -1,6 +1,8 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -55,5 +57,20 @@ export class AuthService {
   private signToken(user: User): { accessToken: string } {
     const payload = { sub: user.id, email: user.email, role: user.role };
     return { accessToken: this.jwtService.sign(payload) };
+  }
+
+  async updateRole(
+    id: string,
+    role: User['role'],
+    requestUserId: string,
+  ): Promise<void> {
+    if (id === requestUserId) {
+      throw new BadRequestException('Cannot change your own role');
+    }
+
+    const result = await this.userRepo.update(id, { role });
+    if (result.affected === 0) {
+      throw new NotFoundException('User not found');
+    }
   }
 }

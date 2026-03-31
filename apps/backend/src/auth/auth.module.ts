@@ -9,6 +9,7 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './roles.guard';
+import { AdminBootstrapService } from './admin-bootstrap.service';
 import { StringValue } from 'ms';
 
 @Module({
@@ -27,7 +28,13 @@ import { StringValue } from 'ms';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+    AdminBootstrapService,
+  ],
   exports: [JwtAuthGuard, RolesGuard],
 })
 export class AuthModule {}
