@@ -1,0 +1,20 @@
+info:
+  name: findOne
+  type: http
+  seq: 3
+
+http:
+  method: GET
+  url: "{{baseUrl}}/orders/{{orderId}}"
+  auth: inherit
+
+runtime:
+  variables:
+    - name: orderId
+      value: 8f760ccc-1f4e-4e9f-98ff-0342b4a884c7
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

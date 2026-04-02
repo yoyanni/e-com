@@ -1,0 +1,20 @@
+info:
+  name: deleteItem
+  type: http
+  seq: 4
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/cart/{{cartItemId}}"
+  auth: inherit
+
+runtime:
+  variables:
+    - name: cartItemId
+      value: 8507d7af-b434-4bcb-a8cc-3d0debe38928
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

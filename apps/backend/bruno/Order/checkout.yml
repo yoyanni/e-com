@@ -1,0 +1,15 @@
+info:
+  name: checkout
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/orders/checkout"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
