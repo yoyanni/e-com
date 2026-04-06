@@ -18,7 +18,9 @@ http:
 runtime:
   scripts:
     - type: after-response
-      code: bru.setGlobalEnvVar("accessToken", res.body.accessToken);
+      code: |-
+        bru.setGlobalEnvVar("accessToken", res.body.accessToken);
+        bru.setGlobalEnvVar("refreshToken", res.body.refreshToken);
 
 settings:
   encodeUrl: true
