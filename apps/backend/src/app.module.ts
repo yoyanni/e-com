@@ -9,6 +9,7 @@ import { Category } from './entities/category.entity';
 import { CartItem } from './entities/cart-item.entity';
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
+import { RefreshToken } from './entities/refresh-token.entity';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ProductsModule } from './products/products.module';
@@ -22,7 +23,15 @@ import { OrdersModule } from './orders/orders.module';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         url: config.get<string>('DATABASE_URL'),
-        entities: [User, Product, Category, CartItem, Order, OrderItem],
+        entities: [
+          User,
+          RefreshToken,
+          Product,
+          Category,
+          CartItem,
+          Order,
+          OrderItem,
+        ],
         synchronize: config.get('NODE_ENV') !== 'production',
         ssl:
           config.get('NODE_ENV') === 'production'

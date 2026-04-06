@@ -6,22 +6,28 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { hash, compare } from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { createHash, randomBytes, randomUUID } from 'crypto';
+import { RefreshToken } from 'src/entities/refresh-token.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(RefreshToken)
+    private readonly refreshTokenRepo: Repository<RefreshToken>,
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(dto: RegisterDto): Promise<{ accessToken: string }> {
+  async register(
+    dto: RegisterDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const existing = await this.userRepo.findOne({
       where: { email: dto.email },
     });
@@ -37,10 +43,12 @@ export class AuthService {
     });
     await this.userRepo.save(user);
 
-    return this.signToken(user);
+    return this.generateTokenPair(user);
   }
 
-  async login(dto: LoginDto): Promise<{ accessToken: string }> {
+  async login(
+    dto: LoginDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const user = await this.userRepo.findOne({ where: { email: dto.email } });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -51,12 +59,48 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.signToken(user);
+    return this.generateTokenPair(user);
   }
 
-  private signToken(user: User): { accessToken: string } {
-    const payload = { sub: user.id, email: user.email, role: user.role };
-    return { accessToken: this.jwtService.sign(payload) };
+  async refreshAccess(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const tokenHash = this.generateHash(refreshToken);
+    const tokenEntity = await this.refreshTokenRepo.findOne({
+      where: { tokenHash },
+      relations: ['user'],
+    });
+
+    if (!tokenEntity) {
+      throw new UnauthorizedException('Invalid refresh token');
+    } else if (tokenEntity.revokedAt) {
+      await this.refreshTokenRepo.update(
+        { family: tokenEntity.family, revokedAt: IsNull() },
+        { revokedAt: new Date() },
+      );
+      throw new UnauthorizedException('Refresh token revoked');
+    } else if (tokenEntity.expiresAt < new Date()) {
+      throw new UnauthorizedException('Refresh token expired');
+    }
+
+    tokenEntity.revokedAt = new Date();
+    await this.refreshTokenRepo.save(tokenEntity);
+
+    return this.generateTokenPair(tokenEntity.user, tokenEntity.family);
+  }
+
+  async logout(refreshToken: string): Promise<void> {
+    const tokenHash = this.generateHash(refreshToken);
+    const tokenEntity = await this.refreshTokenRepo.findOne({
+      where: { tokenHash },
+    });
+
+    if (!tokenEntity) {
+      return;
+    }
+
+    tokenEntity.revokedAt = new Date();
+    await this.refreshTokenRepo.save(tokenEntity);
   }
 
   async updateRole(
@@ -72,5 +116,29 @@ export class AuthService {
     if (result.affected === 0) {
       throw new NotFoundException('User not found');
     }
+  }
+
+  private async generateTokenPair(
+    user: User,
+    family?: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = { sub: user.id, email: user.email, role: user.role };
+
+    const refreshToken = randomBytes(64).toString('hex');
+    const refreshTokenHash = this.generateHash(refreshToken);
+
+    const tokenEntity = this.refreshTokenRepo.create({
+      tokenHash: refreshTokenHash,
+      family: family ?? randomUUID(),
+      user,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    });
+    await this.refreshTokenRepo.save(tokenEntity);
+
+    return { accessToken: this.jwtService.sign(payload), refreshToken };
+  }
+
+  private generateHash(data: string): string {
+    return createHash('sha256').update(data).digest('hex');
   }
 }
