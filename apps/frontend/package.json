@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.99.0",
     "axios": "1.14.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@e-com/shared": "*",
     "@tailwindcss/postcss": "^4",
+    "@tanstack/react-query-devtools": "^5.99.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
