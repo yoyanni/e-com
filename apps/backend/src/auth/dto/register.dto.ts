@@ -1,6 +1,7 @@
+import { IRegisterDto } from '@e-com/shared';
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
-export class RegisterDto {
+export class RegisterDto implements IRegisterDto {
   @IsEmail()
   email: string;
 

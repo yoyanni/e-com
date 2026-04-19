@@ -1,3 +1,8 @@
-// Barrel export — types and DTOs will be added here as modules are built
+export interface ILoginDto {
+  email: string;
+  password: string;
+}
 
-export {};
+export interface IRegisterDto extends ILoginDto {
+  name: string;
+}
