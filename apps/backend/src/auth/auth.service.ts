@@ -14,6 +14,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { createHash, randomBytes, randomUUID } from 'crypto';
 import { RefreshToken } from 'src/entities/refresh-token.entity';
+import { AuthUser } from '@e-com/shared';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +25,14 @@ export class AuthService {
     private readonly refreshTokenRepo: Repository<RefreshToken>,
     private readonly jwtService: JwtService,
   ) {}
+
+  async getMe(userId: string): Promise<AuthUser | null> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return { id: user.id, email: user.email, role: user.role };
+  }
 
   async register(
     dto: RegisterDto,
