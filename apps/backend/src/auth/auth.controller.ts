@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -22,6 +23,12 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  getMe(@Req() req: { user: { id: string } }) {
+    return this.authService.getMe(req.user.id);
+  }
 
   @Post('register')
   register(@Body() dto: RegisterDto) {
