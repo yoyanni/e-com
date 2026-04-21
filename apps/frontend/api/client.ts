@@ -50,11 +50,6 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshError) {
         // Refresh failed — user is truly logged out
-        // Redirect to login (call logout handler on frontend)
-        if (typeof window !== "undefined") {
-          // Clear any frontend state
-          window.location.href = "/login";
-        }
         return Promise.reject(refreshError);
       }
     }
