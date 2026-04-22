@@ -1,13 +1,11 @@
 "use client";
 
 import { ILoginDto } from "@e-com/shared";
-import { useMutation } from "@tanstack/react-query";
 import { ChangeEvent, SubmitEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { loginUser } from "@/api/service";
+import { useAuth } from "@/hooks/useAuth";
 
 const initialForm: ILoginDto = {
   email: "",
@@ -15,15 +13,10 @@ const initialForm: ILoginDto = {
 };
 
 export const LoginForm = () => {
-  const router = useRouter();
   const [formData, setFormData] = useState<ILoginDto>(initialForm);
+  const { loginMutation } = useAuth();
+    const { mutate, isPending, error } = loginMutation;
 
-  const { mutate, isPending, error } = useMutation({
-    mutationFn: loginUser,
-    onSuccess: () => {
-      router.push("/products");
-    },
-  });
 
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
