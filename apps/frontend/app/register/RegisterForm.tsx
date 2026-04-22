@@ -1,13 +1,11 @@
 "use client";
 
 import { IRegisterDto } from "@e-com/shared";
-import { useMutation } from "@tanstack/react-query";
 import { ChangeEvent, SubmitEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { registerUser } from "@/api/service";
+import { useAuth } from "@/hooks/useAuth";
 
 const initialForm: IRegisterDto = {
   name: "",
@@ -16,15 +14,10 @@ const initialForm: IRegisterDto = {
 };
 
 export const RegisterForm = () => {
-  const router = useRouter();
   const [formData, setFormData] = useState<IRegisterDto>(initialForm);
 
-  const { mutate, isPending, error } = useMutation({
-    mutationFn: registerUser,
-    onSuccess: () => {
-      router.push("/products");
-    },
-  });
+  const { registerMutation } = useAuth();
+  const { mutate, isPending, error } = registerMutation;
 
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
