@@ -21,3 +21,38 @@ export interface ILoginDto {
 export interface IRegisterDto extends ILoginDto {
   name: string;
 }
+
+export interface ICategory {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface IProduct {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: number;
+  stock: number;
+  imageUrl: string | null;
+  category: ICategory | null;
+  createdAt: string;
+}
+
+export interface IProductsQuery {
+  search?: string;
+  category?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  sort?: string;
+  page?: string;
+  limit?: string;
+}
+
+export interface IPaginatedProducts {
+  data: IProduct[];
+  total: number;
+  page: number;
+  limit: number;
+}
