@@ -1,5 +1,10 @@
 import "server-only";
-import { ICategory, IPaginatedProducts, IProductsQuery } from "@e-com/shared";
+import {
+  ICategory,
+  IPaginatedProducts,
+  IProduct,
+  IProductsQuery,
+} from "@e-com/shared";
 
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:3001";
 
@@ -19,6 +24,17 @@ export async function fetchProducts(
     next: { revalidate: 60 },
   });
   if (!res.ok) throw new Error("Failed to fetch products");
+  return res.json();
+}
+
+export async function fetchProduct(slug: string): Promise<IProduct> {
+  const res = await fetch(
+    `${BACKEND_URL}/products/${encodeURIComponent(slug)}`,
+    {
+      next: { revalidate: 60 },
+    },
+  );
+  if (!res.ok) throw new Error(`Failed to fetch product: ${slug}`);
   return res.json();
 }
 
