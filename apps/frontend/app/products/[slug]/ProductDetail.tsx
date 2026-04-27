@@ -6,6 +6,7 @@ import { useState } from "react";
 import { IProduct } from "@e-com/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/hooks/useCart";
 
 interface ProductDetailProps {
   product: IProduct;
@@ -29,6 +30,7 @@ const StockBadge = ({ stock }: { stock: number }) => {
 const ProductDetail = ({ product }: ProductDetailProps) => {
   const [quantity, setQuantity] = useState(1);
   const max = Math.min(product.stock, 99);
+  const { addMutation } = useCart();
 
   const price = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -36,8 +38,7 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
   }).format(Number(product.price));
 
   const handleAddToCart = () => {
-    // TODO (step 13): wire up cart mutation
-    console.log("Add to cart", { productId: product.id, quantity });
+    addMutation.mutate({ productId: product.id, quantity });
   };
 
   return (
@@ -112,10 +113,14 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
 
           <Button
             className="flex-1"
-            disabled={product.stock === 0}
+            disabled={product.stock === 0 || addMutation.isPending}
             onClick={handleAddToCart}
           >
-            {product.stock === 0 ? "Out of stock" : "Add to cart"}
+            {product.stock === 0
+              ? "Out of stock"
+              : addMutation.isPending
+                ? "Adding…"
+                : "Add to cart"}
           </Button>
         </div>
       </div>
