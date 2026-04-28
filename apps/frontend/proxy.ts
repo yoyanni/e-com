@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PROTECTED_ROUTES = ["/cart", "/checkout", "/orders"];
+const PROTECTED_ROUTES = ["/cart", "/checkout", "/orders", "/account"];
 const GUEST_ROUTES = ["/login", "/register"];
 
 export function proxy(request: NextRequest) {
