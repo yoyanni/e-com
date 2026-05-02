@@ -61,7 +61,7 @@ export class ProductsService {
     }
 
     const _page = page ?? 1;
-    const _limit = limit ?? 20;
+    const _limit = limit ?? 24;
     qb.skip((_page - 1) * _limit).take(_limit);
 
     const [data, total] = await qb.getManyAndCount();
@@ -102,6 +102,10 @@ export class ProductsService {
     if (!product) {
       throw new NotFoundException(`Product with id "${id}" not found`);
     }
-    return await this.productRepo.save(product);
+    try {
+      return await this.productRepo.save(product);
+    } catch {
+      throw new InternalServerErrorException('Failed to update product');
+    }
   }
 }
