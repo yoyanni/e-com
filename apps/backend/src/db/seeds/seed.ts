@@ -1,21 +1,8 @@
 import 'reflect-metadata';
-import { DataSource } from 'typeorm';
-import { config } from 'dotenv';
-import { Category } from '../entities/category.entity';
-import { User } from '../entities/user.entity';
-import { Product } from '../entities/product.entity';
-import { CartItem } from '../entities/cart-item.entity';
-import { Order } from '../entities/order.entity';
-import { OrderItem } from '../entities/order-item.entity';
+import { Category } from '../../entities/category.entity';
+import { Product } from '../../entities/product.entity';
 import { slugify } from 'src/utils/slugify';
-
-config();
-
-const dataSource = new DataSource({
-  type: 'postgres',
-  url: process.env.DATABASE_URL,
-  entities: [User, Category, Product, CartItem, Order, OrderItem],
-});
+import AppDataSource from '../typeorm.config';
 
 const NUM_CATEGORIES = 10;
 const NUM_PRODUCTS = 50;
@@ -23,11 +10,11 @@ const NUM_PRODUCTS = 50;
 async function seed() {
   const { faker } = await import('@faker-js/faker');
 
-  await dataSource.initialize();
+  await AppDataSource.initialize();
   console.log('Connected to database');
 
-  const categoryRepo = dataSource.getRepository(Category);
-  const productRepo = dataSource.getRepository(Product);
+  const categoryRepo = AppDataSource.getRepository(Category);
+  const productRepo = AppDataSource.getRepository(Product);
 
   // Clear existing data (products first due to FK)
   await productRepo.createQueryBuilder().delete().from(Product).execute();
@@ -70,7 +57,7 @@ async function seed() {
   await productRepo.save(products);
   console.log(`Seeded ${products.length} products`);
 
-  await dataSource.destroy();
+  await AppDataSource.destroy();
   console.log('Done');
 }
 
