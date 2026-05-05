@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Category } from '../../entities/category.entity';
 import { Product } from '../../entities/product.entity';
-import { slugify } from 'src/utils/slugify';
+import { slugify } from '../../utils/slugify';
 import AppDataSource from '../typeorm.config';
 
 const NUM_CATEGORIES = 10;
@@ -11,7 +11,9 @@ async function seed() {
   const { faker } = await import('@faker-js/faker');
 
   await AppDataSource.initialize();
-  console.log('Connected to database');
+  console.log(
+    `Connected to ${process.env.NODE_ENV === 'production' ? 'PROD' : 'NON-PROD'} database`,
+  );
 
   const categoryRepo = AppDataSource.getRepository(Category);
   const productRepo = AppDataSource.getRepository(Product);
