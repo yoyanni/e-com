@@ -7,7 +7,7 @@ import {
 import { hash, compare } from 'bcrypt';
 import { IsNull } from 'typeorm';
 import { AuthService } from './auth.service';
-import { UserRole } from 'src/entities/user.entity';
+import { UserRole } from '@e-com/shared';
 
 jest.mock('bcrypt');
 

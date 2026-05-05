@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { hash } from 'bcrypt';
-import { User, UserRole } from '../entities/user.entity';
+import { User } from '../entities/user.entity';
+import { UserRole } from '@e-com/shared';
 
 @Injectable()
 export class AdminBootstrapService implements OnApplicationBootstrap {

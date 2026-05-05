@@ -6,13 +6,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserRole } from '@e-com/shared';
 import { CartItem } from './cart-item.entity';
 import { Order } from './order.entity';
-
-export enum UserRole {
-  CUSTOMER = 'customer',
-  ADMIN = 'admin',
-}
 
 @Entity('users')
 export class User {
@@ -28,7 +24,11 @@ export class User {
   @Column()
   name: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.CUSTOMER })
+  @Column({
+    type: 'enum',
+    enum: Object.values(UserRole),
+    default: UserRole.CUSTOMER,
+  })
   role: UserRole;
 
   @OneToMany(() => Order, (order) => order.user)
