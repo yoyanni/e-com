@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SubmitEvent, useRef } from "react";
+import { SubmitEvent, Suspense, useRef } from "react";
 import { ShoppingCart } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,11 +11,11 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 
-export function Navbar() {
+function NavbarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { isAuthenticated, isLoading, logoutMutation } = useAuth();
+  const { isAuthenticated, logoutMutation } = useAuth();
   const { cartItems } = useCart();
   const itemCount = isAuthenticated
     ? cartItems.reduce((n, i) => n + i.quantity, 0)
@@ -35,6 +35,64 @@ export function Navbar() {
   }
 
   return (
+    <NavbarContainer>
+      <form onSubmit={handleSearch} className="flex flex-1 items-center gap-2">
+        <Input
+          ref={inputRef}
+          type="search"
+          placeholder="Search products…"
+          defaultValue={searchParams.get("search") ?? ""}
+          className="h-8 max-w-sm"
+          aria-label="Search products"
+        />
+      </form>
+
+      <nav className="ml-auto flex items-center gap-2">
+        <Button variant="ghost" size="icon" asChild aria-label="Cart">
+          <Link href="/cart" className="relative">
+            <ShoppingCart className="size-5" />
+            {itemCount > 0 && (
+              <Badge
+                variant="default"
+                className="absolute -right-1.5 -top-1.5 h-4 min-w-4 rounded-full px-1 text-[10px] leading-none"
+                aria-label={`${itemCount} items in cart`}
+              >
+                {itemCount > 99 ? "99+" : itemCount}
+              </Badge>
+            )}
+          </Link>
+        </Button>
+
+        {isAuthenticated ? (
+          <>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/account/orders">Account</Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => logoutMutation.mutate()}
+            >
+              Logout
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/login">Login</Link>
+            </Button>
+            <Button size="sm" asChild>
+              <Link href="/register">Register</Link>
+            </Button>
+          </>
+        )}
+      </nav>
+    </NavbarContainer>
+  );
+}
+
+function NavbarContainer({ children }: { children?: React.ReactNode }) {
+  return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto flex h-14 items-center gap-4 px-4">
         <Link
@@ -43,66 +101,16 @@ export function Navbar() {
         >
           E-com
         </Link>
-
-        <form
-          onSubmit={handleSearch}
-          className="flex flex-1 items-center gap-2"
-        >
-          <Input
-            ref={inputRef}
-            type="search"
-            placeholder="Search products…"
-            defaultValue={searchParams.get("search") ?? ""}
-            className="h-8 max-w-sm"
-            aria-label="Search products"
-          />
-        </form>
-
-        <nav className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" size="icon" asChild aria-label="Cart">
-            <Link href="/cart" className="relative">
-              <ShoppingCart className="size-5" />
-              {itemCount > 0 && (
-                <Badge
-                  variant="default"
-                  className="absolute -right-1.5 -top-1.5 h-4 min-w-4 rounded-full px-1 text-[10px] leading-none"
-                  aria-label={`${itemCount} items in cart`}
-                >
-                  {itemCount > 99 ? "99+" : itemCount}
-                </Badge>
-              )}
-            </Link>
-          </Button>
-
-          {!isLoading && (
-            <>
-              {isAuthenticated ? (
-                <>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href="/account/orders">Account</Link>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => logoutMutation.mutate()}
-                  >
-                    Logout
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href="/login">Login</Link>
-                  </Button>
-                  <Button size="sm" asChild>
-                    <Link href="/register">Register</Link>
-                  </Button>
-                </>
-              )}
-            </>
-          )}
-        </nav>
+        {children}
       </div>
     </header>
+  );
+}
+
+export function Navbar() {
+  return (
+    <Suspense fallback={<NavbarContainer />}>
+      <NavbarContent />
+    </Suspense>
   );
 }
