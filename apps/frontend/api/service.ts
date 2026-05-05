@@ -4,6 +4,8 @@ import {
   AuthUser,
   ICartItem,
   IOrder,
+  IAddCartItemDto,
+  IUpdateCartItemDto,
 } from "@e-com/shared";
 import apiClient from "./client";
 
@@ -30,11 +32,13 @@ export const fetchCart = async (): Promise<ICartItem[]> => {
   return data;
 };
 
-export const addCartItem = (dto: { productId: string; quantity: number }) =>
+export const addCartItem = (dto: IAddCartItemDto) =>
   apiClient.post<ICartItem>("/cart", dto);
 
-export const updateCartItem = (itemId: string, quantity: number) =>
-  apiClient.patch<ICartItem>(`/cart/${itemId}`, { quantity });
+export const updateCartItem = (
+  itemId: string,
+  quantity: IUpdateCartItemDto["quantity"],
+) => apiClient.patch<ICartItem>(`/cart/${itemId}`, { quantity });
 
 export const removeCartItem = (itemId: string) =>
   apiClient.delete(`/cart/${itemId}`);

@@ -13,7 +13,7 @@ import { GetProductsQueryDto } from './dto/get-products-query.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
-import { UserRole } from 'src/entities/user.entity';
+import { UserRole } from '@e-com/shared';
 import { CreateProductBodyDto } from './dto/create-product-body.dto';
 import { UpdateProductBodyDto } from './dto/update-product-body.dto';
 
