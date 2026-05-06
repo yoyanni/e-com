@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "dev:frontend": "npm run dev -w @e-com/frontend",
+    "build:vercel": "npm run build -w @e-com/shared && npm run build -w @e-com/frontend",
     "dev:backend": "npm run start:dev -w @e-com/backend",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",

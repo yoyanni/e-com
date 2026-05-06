@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build -w @e-com/frontend",
+  "buildCommand": "npm run build:vercel",
   "outputDirectory": "apps/frontend/.next",
   "installCommand": "npm ci",
   "framework": "nextjs"
