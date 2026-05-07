@@ -14,7 +14,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { UserRole } from '@e-com/shared';
+import { UserRole } from 'src/entities/user.entity';
 import { Roles } from './roles.decorator';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './roles.guard';

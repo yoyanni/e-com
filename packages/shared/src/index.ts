@@ -1,3 +1,5 @@
+// There is a duplicate in apps/backend/src/entities/user.entity.ts
+// There was an issue with enums/consts being imported into NestJS
 export const UserRole = {
   CUSTOMER: "customer",
   ADMIN: "admin",
@@ -89,13 +91,4 @@ export interface IOrder {
   total: number;
   items: IOrderItem[];
   createdAt: string;
-}
-
-export interface IAddCartItemDto {
-  productId: string;
-  quantity: number;
-}
-
-export interface IUpdateCartItemDto {
-  quantity: number;
 }

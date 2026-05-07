@@ -7,9 +7,16 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { OrderStatus } from '@e-com/shared';
 import { OrderItem } from './order-item.entity';
 import { User } from './user.entity';
+
+export enum OrderStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  SHIPPED = 'shipped',
+  DELIVERED = 'delivered',
+  CANCELLED = 'cancelled',
+}
 
 @Entity('orders')
 export class Order {
@@ -24,7 +31,7 @@ export class Order {
 
   @Column({
     type: 'enum',
-    enum: Object.values(OrderStatus),
+    enum: OrderStatus,
     default: OrderStatus.PENDING,
   })
   status: OrderStatus;
