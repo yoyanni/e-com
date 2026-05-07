@@ -1,19 +1,9 @@
-import type { Metadata } from "next";
+import React from 'react'
 
-import { LoginForm } from "./LoginForm";
-
-export const metadata: Metadata = {
-  title: "Login",
-  description: "Login to your account to start shopping.",
-};
-
-const LoginPage = () => {
+const Login = () => {
   return (
-    <main className="mx-auto w-full max-w-md p-6">
-      <h1 className="text-2xl font-semibold">Login</h1>
-      <LoginForm />
-    </main>
-  );
-};
+    <div>login</div>
+  )
+}
 
-export default LoginPage;
+export default Login
