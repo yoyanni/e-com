@@ -8,15 +8,14 @@ import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/hooks/useAuth";
 
 export function Navbar() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { isAuthenticated, isLoading, logoutMutation } = useAuth();
-  const itemCount = isAuthenticated ? 3 : 0; // Replace with actual cart item count
-
+  const itemCount = 3; // Replace with actual cart item count
+  const user = null;
+  const isLoading = false;
 
   function handleSearch(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();   
@@ -73,12 +72,12 @@ export function Navbar() {
 
           {!isLoading && (
             <>
-              {isAuthenticated ? (
+              {user ? (
                 <>
                   <Button variant="ghost" size="sm" asChild>
                     <Link href="/account/orders">Account</Link>
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => logoutMutation.mutate()}>
+                  <Button variant="outline" size="sm" onClick={()=>console.log("logout")}>
                     Logout
                   </Button>
                 </>
