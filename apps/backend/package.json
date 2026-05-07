@@ -21,7 +21,6 @@
     "seed": "ts-node src/seeds/seed.ts"
   },
   "dependencies": {
-    "@e-com/shared": "^0.1.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
@@ -40,6 +39,7 @@
     "typeorm": "^0.3.28"
   },
   "devDependencies": {
+    "@e-com/shared": "*",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@faker-js/faker": "^10.4.0",
