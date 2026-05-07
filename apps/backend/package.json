@@ -1,6 +1,6 @@
 {
   "name": "@e-com/backend",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "",
   "author": "",
   "private": true,
@@ -25,7 +25,7 @@
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/db/typeorm.config.ts"
   },
   "dependencies": {
-    "@e-com/shared": "^0.1.0",
+    "@e-com/shared": "^1.0.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
