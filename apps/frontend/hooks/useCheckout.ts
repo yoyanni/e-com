@@ -2,7 +2,8 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { checkoutCart } from "@/api/service";
 import { CART_QUERY_KEY } from "./useCart";
-import { ORDERS_QUERY_KEY } from "./useOrders";
+
+export const ORDERS_QUERY_KEY = ["orders"] as const;
 
 export function useCheckout() {
   const queryClient = useQueryClient();

@@ -39,18 +39,8 @@ export const updateCartItem = (itemId: string, quantity: number) =>
 export const removeCartItem = (itemId: string) =>
   apiClient.delete(`/cart/${itemId}`);
 
-// Order calls
+// Order call
 export const checkoutCart = async (): Promise<IOrder> => {
   const { data } = await apiClient.post<IOrder>("/orders/checkout");
-  return data;
-};
-
-export const fetchOrders = async (): Promise<IOrder[]> => {
-  const { data } = await apiClient.get<IOrder[]>("/orders");
-  return data;
-};
-
-export const fetchOrder = async (id: string): Promise<IOrder> => {
-  const { data } = await apiClient.get<IOrder>(`/orders/${id}`);
   return data;
 };
