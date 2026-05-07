@@ -17,7 +17,7 @@ const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60; // 7 days (seconds)
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ action: string }> },
+  { params }: { params: { action: string } },
 ) {
   const { action } = await params;
 
