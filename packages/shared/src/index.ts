@@ -56,11 +56,3 @@ export interface IPaginatedProducts {
   page: number;
   limit: number;
 }
-
-export interface ICartItem {
-  id: string;
-  userId: string;
-  productId: string;
-  quantity: number;
-  product: IProduct;
-}

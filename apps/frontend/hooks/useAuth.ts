@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchMe, loginUser, logoutUser, registerUser } from "@/api/service";
-import { CART_QUERY_KEY } from "./useCart";
 
 // Centralise the key so invalidations/setQueryData calls elsewhere
 // in the codebase (e.g. middleware, other hooks) never drift from the truth.
@@ -16,7 +15,6 @@ export function useAuth() {
     queryKey: ME_QUERY_KEY,
     queryFn: fetchMe,
     retry: false, // don't retry 401s — that's not a transient error
-    refetchOnWindowFocus: true,
   });
 
   const registerMutation = useMutation({
@@ -31,7 +29,6 @@ export function useAuth() {
     mutationFn: loginUser,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ME_QUERY_KEY });
-      await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
       router.push("/products");
     },
   });
@@ -43,7 +40,6 @@ export function useAuth() {
       queryClient.clear();
       // Set null to avoid refetching unnecessarily
       queryClient.setQueryData(ME_QUERY_KEY, null);
-      queryClient.setQueryData(CART_QUERY_KEY, []);
       router.push("/");
     },
   });

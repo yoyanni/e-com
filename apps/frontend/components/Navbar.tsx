@@ -9,20 +9,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { useCart } from "@/hooks/useCart";
 
 export function Navbar() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
   const { isAuthenticated, isLoading, logoutMutation } = useAuth();
-  const { cartItems } = useCart();
-  const itemCount = isAuthenticated
-    ? cartItems.reduce((n, i) => n + i.quantity, 0)
-    : 0;
+  const itemCount = isAuthenticated ? 3 : 0; // Replace with actual cart item count
+
 
   function handleSearch(e: SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
+    e.preventDefault();   
     const query = inputRef.current?.value.trim() ?? "";
     const params = new URLSearchParams(searchParams.toString());
     if (query) {
@@ -81,11 +78,7 @@ export function Navbar() {
                   <Button variant="ghost" size="sm" asChild>
                     <Link href="/account/orders">Account</Link>
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => logoutMutation.mutate()}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => logoutMutation.mutate()}>
                     Logout
                   </Button>
                 </>
