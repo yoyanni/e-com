@@ -1,7 +1,13 @@
 "use client";
 
+import { useAuth } from "@/hooks/useAuth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+function AuthLoader({ children }: { children: React.ReactNode }) {
+  useAuth();
+  return <>{children}</>;
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,7 +23,7 @@ const queryClient = new QueryClient({
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <AuthLoader>{children}</AuthLoader>
       <ReactQueryDevtools />
     </QueryClientProvider>
   );
