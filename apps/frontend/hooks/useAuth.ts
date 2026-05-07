@@ -36,11 +36,11 @@ export function useAuth() {
   const logoutMutation = useMutation({
     mutationFn: logoutUser,
     onSuccess: () => {
-      // Clear everything (cart, orders) so no user-specific data leaks.
-      queryClient.clear();
-      // Set null to avoid refetching unnecessarily
+      // Set null immediately
       queryClient.setQueryData(ME_QUERY_KEY, null);
-      router.push("/");
+      // Clear everything else (cart, orders) so no user-specific data leaks.
+      queryClient.clear();
+      router.push("/login");
     },
   });
 
