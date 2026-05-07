@@ -3,7 +3,6 @@ import {
   IRegisterDto,
   AuthUser,
   ICartItem,
-  IOrder,
 } from "@e-com/shared";
 import apiClient from "./client";
 
@@ -38,9 +37,3 @@ export const updateCartItem = (itemId: string, quantity: number) =>
 
 export const removeCartItem = (itemId: string) =>
   apiClient.delete(`/cart/${itemId}`);
-
-// Order call
-export const checkoutCart = async (): Promise<IOrder> => {
-  const { data } = await apiClient.post<IOrder>("/orders/checkout");
-  return data;
-};

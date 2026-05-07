@@ -64,31 +64,3 @@ export interface ICartItem {
   quantity: number;
   product: IProduct;
 }
-
-export const OrderStatus = {
-  PENDING: "pending",
-  PAID: "paid",
-  SHIPPED: "shipped",
-  DELIVERED: "delivered",
-  CANCELLED: "cancelled",
-} as const;
-
-export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
-
-export interface IOrderItem {
-  id: string;
-  orderId: string;
-  productId: string;
-  quantity: number;
-  unitPrice: number;
-  product: IProduct;
-}
-
-export interface IOrder {
-  id: string;
-  userId: string;
-  status: OrderStatus;
-  total: number;
-  items: IOrderItem[];
-  createdAt: string;
-}
