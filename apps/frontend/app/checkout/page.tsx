@@ -75,7 +75,9 @@ export default function CheckoutPage() {
         </Button>
 
         <Button variant="ghost" size="sm" asChild className="w-full">
-          <Link href="/cart">← Back to cart</Link>
+          <Link href="/cart" prefetch={false}>
+            ← Back to cart
+          </Link>
         </Button>
       </div>
     </div>

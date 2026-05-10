@@ -91,7 +91,9 @@ export default function OrdersPage() {
               {formatted.format(Number(order.total))}
             </span>
             <Button asChild variant="outline" size="sm">
-              <Link href={`/account/orders/${order.id}`}>View</Link>
+              <Link href={`/account/orders/${order.id}`} prefetch={false}>
+                View
+              </Link>
             </Button>
           </div>
         ))}

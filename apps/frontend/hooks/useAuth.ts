@@ -32,7 +32,7 @@ export function useAuth() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ME_QUERY_KEY });
       await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
-      router.push("/products");
+      router.refresh();
     },
   });
 

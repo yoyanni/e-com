@@ -28,6 +28,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/cart"
+                  prefetch={false}
                   className="hover:text-foreground transition-colors"
                 >
                   Cart
@@ -44,6 +45,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/login"
+                  prefetch={false}
                   className="hover:text-foreground transition-colors"
                 >
                   Login
@@ -52,6 +54,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/account/orders"
+                  prefetch={false}
                   className="hover:text-foreground transition-colors"
                 >
                   Order History

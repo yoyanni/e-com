@@ -147,7 +147,9 @@ export function CartContent() {
         </div>
 
         <Button asChild className="w-full" size="lg">
-          <Link href="/checkout">Proceed to checkout</Link>
+          <Link href="/checkout" prefetch={false}>
+            Proceed to checkout
+          </Link>
         </Button>
       </div>
     </div>

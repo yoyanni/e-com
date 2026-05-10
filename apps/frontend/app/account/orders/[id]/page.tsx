@@ -45,7 +45,7 @@ export default function OrderDetailPage() {
     return (
       <div className="container max-w-3xl mx-auto py-12 px-4">
         <Button asChild variant="ghost" size="sm" className="mb-6 -ml-2">
-          <Link href="/account/orders">
+          <Link href="/account/orders" prefetch={false}>
             <ArrowLeft className="size-4 mr-1" />
             Back to orders
           </Link>
@@ -58,7 +58,7 @@ export default function OrderDetailPage() {
   return (
     <div className="container max-w-3xl mx-auto py-12 px-4">
       <Button asChild variant="ghost" size="sm" className="mb-6 -ml-2">
-        <Link href="/account/orders">
+        <Link href="/account/orders" prefetch={false}>
           <ArrowLeft className="size-4 mr-1" />
           Back to orders
         </Link>

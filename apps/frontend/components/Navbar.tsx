@@ -49,7 +49,7 @@ function NavbarContent() {
 
       <nav className="ml-auto flex items-center gap-2">
         <Button variant="ghost" size="icon" asChild aria-label="Cart">
-          <Link href="/cart" className="relative">
+          <Link href="/cart" prefetch={false} className="relative">
             <ShoppingCart className="size-5" />
             {itemCount > 0 && (
               <Badge
@@ -66,7 +66,9 @@ function NavbarContent() {
         {isAuthenticated ? (
           <>
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/account/orders">Account</Link>
+              <Link href="/account/orders" prefetch={false}>
+                Account
+              </Link>
             </Button>
             <Button
               variant="outline"
@@ -79,10 +81,10 @@ function NavbarContent() {
         ) : (
           <>
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">Login</Link>
+              <Link href="/login" prefetch={false}>Login</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/register">Register</Link>
+              <Link href="/register" prefetch={false}>Register</Link>
             </Button>
           </>
         )}

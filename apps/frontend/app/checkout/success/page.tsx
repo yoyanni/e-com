@@ -46,7 +46,7 @@ export default async function CheckoutSuccessPage({
 
       <div className="flex gap-3">
         <Button asChild variant="outline">
-          <Link href="/account/orders">View orders</Link>
+          <Link href="/account/orders" prefetch={false}>View orders</Link>
         </Button>
         <Button asChild>
           <Link href="/products">Continue shopping</Link>
