@@ -1,3 +1,4 @@
+import { AUTH_CONSTANTS } from "@e-com/shared";
 import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
@@ -8,9 +9,6 @@ const TOKEN_COOKIE_OPTIONS = {
   sameSite: "strict" as const,
   path: "/",
 };
-
-const ACCESS_TOKEN_MAX_AGE = 15 * 60; // 15 minutes (seconds)
-const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60; // 7 days (seconds)
 
 /**
  * valid actions: "login", "register", "refresh", "logout"
@@ -84,14 +82,14 @@ export async function POST(
     if (accessToken) {
       response.cookies.set("accessToken", accessToken, {
         ...TOKEN_COOKIE_OPTIONS,
-        maxAge: ACCESS_TOKEN_MAX_AGE,
+        maxAge: AUTH_CONSTANTS.ACCESS_TOKEN_TTL_SECONDS,
       });
     }
 
     if (refreshToken) {
       response.cookies.set("refreshToken", refreshToken, {
         ...TOKEN_COOKIE_OPTIONS,
-        maxAge: REFRESH_TOKEN_MAX_AGE,
+        maxAge: AUTH_CONSTANTS.REFRESH_TOKEN_TTL_SECONDS,
       });
     }
 

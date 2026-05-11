@@ -11,7 +11,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './roles.guard';
 import { AdminBootstrapService } from './admin-bootstrap.service';
-import { StringValue } from 'ms';
+import { AUTH_CONSTANTS } from '@e-com/shared';
 
 @Module({
   imports: [
@@ -22,7 +22,7 @@ import { StringValue } from 'ms';
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: config.get<StringValue>('JWT_ACCESS_EXPIRES_IN') ?? '15m',
+          expiresIn: `${AUTH_CONSTANTS.ACCESS_TOKEN_TTL_SECONDS / 60} minutes`,
         },
       }),
       inject: [ConfigService],

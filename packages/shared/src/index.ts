@@ -1,3 +1,8 @@
+export const AUTH_CONSTANTS = {
+  ACCESS_TOKEN_TTL_SECONDS: 15 * 60,
+  REFRESH_TOKEN_TTL_SECONDS: 7 * 24 * 60 * 60,
+} as const;
+
 export const UserRole = {
   CUSTOMER: "customer",
   ADMIN: "admin",
