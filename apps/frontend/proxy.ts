@@ -4,6 +4,18 @@ import type { NextRequest } from "next/server";
 const PROTECTED_ROUTES = ["/cart", "/checkout", "/orders", "/account"];
 const GUEST_ROUTES = ["/login", "/register"];
 
+function getSafeRedirectPath(redirectTo: string | null) {
+  if (
+    !redirectTo ||
+    !redirectTo.startsWith("/") ||
+    redirectTo.startsWith("//")
+  ) {
+    return "/products";
+  }
+
+  return redirectTo;
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAuthenticated = request.cookies.has("accessToken");
@@ -16,18 +28,27 @@ export function proxy(request: NextRequest) {
 
   if (isProtected && !isAuthenticated && !canRefresh) {
     const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
+    loginUrl.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   if (isGuestOnly && isAuthenticated) {
-    const nextUrl = request.nextUrl.searchParams.get("next");
-    return NextResponse.redirect(new URL(nextUrl ?? "/products", request.url));
+    const redirectTo = getSafeRedirectPath(
+      request.nextUrl.searchParams.get("redirectTo"),
+    );
+
+    return NextResponse.redirect(new URL(redirectTo, request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/cart/:path*",
+    "/checkout/:path*",
+    "/account/:path*",
+    "/login",
+    "/register",
+  ],
 };
