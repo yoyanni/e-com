@@ -17,7 +17,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "node --env-file=.env.test ../../node_modules/jest/bin/jest.js --config ./test/jest-e2e.json --runInBand",
     "seed:local": "ts-node src/db/seeds/seed.ts",
     "seed:prod": "node --env-file=.env.prod -r ts-node/register src/db/seeds/seed.ts",
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/db/typeorm.config.ts src/db/migrations",
