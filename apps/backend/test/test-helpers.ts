@@ -5,7 +5,7 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { Category } from '../src/entities/category.entity';
 import { Product } from '../src/entities/product.entity';
-import { Server } from 'https';
+import { type Server } from 'http';
 
 export async function createApp(): Promise<{
   app: INestApplication;

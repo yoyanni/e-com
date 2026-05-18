@@ -36,11 +36,13 @@ export class AuthController {
   }
 
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
 
   @Post('refresh')
+  @HttpCode(HttpStatus.OK)
   refreshAccess(@Body() dto: RefreshTokenDto) {
     return this.authService.refreshAccess(dto.refreshToken);
   }
