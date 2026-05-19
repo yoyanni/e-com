@@ -80,6 +80,19 @@ export async function makeAdmin(
   ]);
 }
 
+export async function loginAsAdmin(
+  app: INestApplication,
+  dataSource: DataSource,
+  creds: { email: string; password: string; name: string },
+): Promise<string> {
+  const { userId } = await registerAndLogin(app, creds);
+  await makeAdmin(dataSource, userId);
+  const loginRes = await request(app.getHttpServer() as Server)
+    .post('/auth/login')
+    .send({ email: creds.email, password: creds.password });
+  return (loginRes.body as { accessToken: string }).accessToken;
+}
+
 export async function seedCategory(dataSource: DataSource): Promise<Category> {
   return dataSource.getRepository(Category).save({
     name: 'Test Category',
@@ -89,13 +102,20 @@ export async function seedCategory(dataSource: DataSource): Promise<Category> {
 
 export async function seedProduct(
   dataSource: DataSource,
-  categoryId?: string,
+  overrides?: Partial<{
+    name: string;
+    slug: string;
+    price: number;
+    stock: number;
+    categoryId: string | null;
+  }>,
 ): Promise<Product> {
   return dataSource.getRepository(Product).save({
     name: 'Test Product',
     slug: 'test-product',
     price: 29.99,
     stock: 10,
-    categoryId: categoryId ?? null,
+    categoryId: null,
+    ...overrides,
   });
 }
