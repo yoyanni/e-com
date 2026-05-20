@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CartItem } from 'src/entities/cart-item.entity';
 import { OrderItem } from 'src/entities/order-item.entity';
@@ -21,7 +25,7 @@ export class OrdersService {
       });
 
       if (cartItems.length === 0) {
-        throw new Error('Cart is empty');
+        throw new BadRequestException('Cart is empty');
       }
 
       const outofStockItems = cartItems.filter(
@@ -29,7 +33,7 @@ export class OrdersService {
       );
 
       if (outofStockItems.length > 0) {
-        throw new Error('Some items are out of stock');
+        throw new BadRequestException('Some items are out of stock');
       }
 
       const total = cartItems.reduce(
