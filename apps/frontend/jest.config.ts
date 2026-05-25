@@ -7,9 +7,10 @@ const config: Config = {
   testEnvironment: "jsdom",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   moduleNameMapper: {
-    // Prevent 'server-only' from throwing in test environment
     "^server-only$": "<rootDir>/__tests__/__mocks__/server-only.ts",
+    "^@/(.*)$": "<rootDir>/$1",
   },
+  testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
 };
 
 export default createJestConfig(config);

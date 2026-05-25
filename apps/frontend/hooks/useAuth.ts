@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchMe, loginUser, logoutUser, registerUser } from "@/api/service";
 import { CART_QUERY_KEY } from "./useCart";
+import { ILoginDto, IRegisterDto } from "@e-com/shared";
 
 // Centralise the key so invalidations/setQueryData calls elsewhere
 // in the codebase (e.g. middleware, other hooks) never drift from the truth.
@@ -20,7 +21,7 @@ export function useAuth() {
   });
 
   const registerMutation = useMutation({
-    mutationFn: registerUser,
+    mutationFn: (dto: IRegisterDto) => registerUser(dto),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ME_QUERY_KEY });
       router.push("/products");
@@ -28,7 +29,7 @@ export function useAuth() {
   });
 
   const loginMutation = useMutation({
-    mutationFn: loginUser,
+    mutationFn: (dto: ILoginDto) => loginUser(dto),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ME_QUERY_KEY });
       await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
@@ -37,7 +38,7 @@ export function useAuth() {
   });
 
   const logoutMutation = useMutation({
-    mutationFn: logoutUser,
+    mutationFn: () => logoutUser(),
     onSuccess: () => {
       // Clear everything (cart, orders) so no user-specific data leaks.
       queryClient.clear();

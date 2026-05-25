@@ -1,5 +1,5 @@
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
-import { ICartItem } from "@e-com/shared";
+import { IAddCartItemDto, ICartItem } from "@e-com/shared";
 import {
   fetchCart,
   addCartItem,
@@ -19,7 +19,7 @@ export function useCart() {
   });
 
   const addMutation = useMutation({
-    mutationFn: addCartItem,
+    mutationFn: (dto: IAddCartItemDto) => addCartItem(dto),
     onMutate: async (newItem) => {
       await queryClient.cancelQueries({ queryKey: CART_QUERY_KEY });
       const previous = queryClient.getQueryData<ICartItem[]>(CART_QUERY_KEY);
@@ -82,7 +82,7 @@ export function useCart() {
   });
 
   const removeMutation = useMutation({
-    mutationFn: removeCartItem,
+    mutationFn: (itemId: string) => removeCartItem(itemId),
     onMutate: async (itemId) => {
       await queryClient.cancelQueries({ queryKey: CART_QUERY_KEY });
       const previous = queryClient.getQueryData<ICartItem[]>(CART_QUERY_KEY);
