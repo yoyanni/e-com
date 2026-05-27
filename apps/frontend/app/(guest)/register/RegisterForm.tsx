@@ -6,6 +6,7 @@ import { ChangeEvent, SubmitEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import { getApiErrorMessage } from "@/lib/getApiErrorMessage";
 
 const initialForm: IRegisterDto = {
   name: "",
@@ -29,13 +30,7 @@ export const RegisterForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const errorMessage = error
-    ? ((error as { response?: { data?: { message?: string; error?: string } } })
-        .response?.data?.message ??
-      (error as { response?: { data?: { error?: string } } }).response?.data
-        ?.error ??
-      error.message)
-    : null;
+  const errorMessage = error ? getApiErrorMessage(error) : null;
 
   return (
     <form className="mt-6 space-y-4" onSubmit={handleSubmit}>

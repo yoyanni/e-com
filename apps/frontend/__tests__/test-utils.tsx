@@ -1,4 +1,5 @@
 import React from "react";
+import { render } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ICartItem, IProduct, ICategory, AuthUser } from "@e-com/shared";
 
@@ -22,6 +23,16 @@ export function createWrapper(client = createQueryClient()) {
     return (
       <QueryClientProvider client={client}>{children}</QueryClientProvider>
     );
+  };
+}
+
+export function renderWithQuery(
+  ui: React.ReactElement,
+  client = createQueryClient(),
+) {
+  return {
+    ...render(ui, { wrapper: createWrapper(client) }),
+    queryClient: client,
   };
 }
 
