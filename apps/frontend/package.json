@@ -10,7 +10,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "e2e:mock": "playwright test --project=mocked",
+    "e2e:mock": "playwright test --config=playwright.mocked.config.ts",
     "e2e:smoke": "playwright test --project=smoke"
   },
   "dependencies": {

@@ -64,7 +64,7 @@ export const LoginForm = () => {
       </div>
 
       {errorMessage ? (
-        <p className="text-sm text-red-600">{errorMessage}</p>
+        <p role="alert" data-testid="login-error" className="text-sm text-red-600">{errorMessage}</p>
       ) : null}
 
       <Button className="w-full" disabled={isPending} type="submit">

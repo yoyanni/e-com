@@ -37,6 +37,7 @@ export function CartContent() {
         {cartItems.map((item) => (
           <div
             key={item.id}
+            data-testid="cart-item"
             className="flex items-center gap-4 rounded-lg border p-4"
           >
             {/* Product image */}

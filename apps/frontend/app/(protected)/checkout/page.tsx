@@ -38,7 +38,7 @@ export default function CheckoutPage() {
 
         <ul className="flex flex-col gap-2 text-sm">
           {cartItems.map((item) => (
-            <li key={item.id} className="flex justify-between">
+            <li key={item.id} data-testid="checkout-item" className="flex justify-between">
               <span className="text-muted-foreground line-clamp-1 flex-1 mr-2">
                 {item.product?.name ?? "Product"} × {item.quantity}
               </span>
@@ -59,7 +59,7 @@ export default function CheckoutPage() {
         </div>
 
         {checkoutMutation.isError && (
-          <p className="text-sm text-destructive">
+          <p role="alert" data-testid="checkout-error" className="text-sm text-destructive">
             {(checkoutMutation.error as Error)?.message ??
               "Something went wrong. Please try again."}
           </p>
