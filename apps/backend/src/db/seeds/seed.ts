@@ -1,5 +1,7 @@
 import 'reflect-metadata';
 import { Category } from '../../entities/category.entity';
+import { Order } from '../../entities/order.entity';
+import { OrderItem } from '../../entities/order-item.entity';
 import { Product } from '../../entities/product.entity';
 import { slugify } from '../../utils/slugify';
 import AppDataSource from '../typeorm.config';
@@ -17,8 +19,14 @@ async function seed() {
 
   const categoryRepo = AppDataSource.getRepository(Category);
   const productRepo = AppDataSource.getRepository(Product);
+  const orderItemRepo = AppDataSource.getRepository(OrderItem);
+  const orderRepo = AppDataSource.getRepository(Order);
 
-  // Clear existing data (products first due to FK)
+  // Clear existing data in FK-safe order
+  await orderItemRepo.createQueryBuilder().delete().from(OrderItem).execute();
+  console.log('Cleared order_items table');
+  await orderRepo.createQueryBuilder().delete().from(Order).execute();
+  console.log('Cleared orders table');
   await productRepo.createQueryBuilder().delete().from(Product).execute();
   console.log('Cleared products table');
   await categoryRepo.createQueryBuilder().delete().from(Category).execute();
