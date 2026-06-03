@@ -10,8 +10,10 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "e2e:mock": "playwright test --config=playwright.mocked.config.ts",
-    "e2e:smoke": "playwright test --config=playwright.config.ts"
+    "test:e2e:mock": "playwright test --config=playwright.mocked.config.ts",
+    "test:e2e:smoke": "playwright test --config=playwright.config.ts",
+    "test:e2e": "npm run test:e2e:mock && npm run test:e2e:smoke",
+    "test:all": "npm run test && npm run test:e2e"
   },
   "dependencies": {
     "@e-com/shared": "^1.0.1",

@@ -8,16 +8,22 @@
   ],
   "scripts": {
     "dev:frontend": "npm run dev -w @e-com/frontend",
-    "build:vercel": "npm run build -w @e-com/shared && npm run build -w @e-com/frontend",
     "dev:backend": "npm run start:dev -w @e-com/backend",
+    "build:vercel": "npm run build -w @e-com/shared && npm run build -w @e-com/frontend",
     "build": "npm run build --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
-    "test:frontend": "npm run test -w @e-com/frontend",
-    "test:backend": "npm run test -w @e-com/backend",
-    "test:e2e": "npm run test:e2e -w @e-com/backend",
-    "e2e:mock": "npm run e2e:mock -w @e-com/frontend",
-    "e2e:smoke": "npm run e2e:smoke -w @e-com/frontend",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test:unit",
+    "test:all": "npm run test:unit && npm run test:e2e",
+    "test:unit": "npm run test:unit:backend && npm run test:unit:frontend",
+    "test:unit:backend": "npm run test -w @e-com/backend",
+    "test:unit:frontend": "npm run test -w @e-com/frontend",
+    "test:e2e": "npm run test:e2e:backend && npm run test:e2e:frontend",
+    "test:e2e:backend": "npm run test:e2e -w @e-com/backend",
+    "test:e2e:frontend": "npm run test:e2e -w @e-com/frontend",
+    "test:e2e:frontend:mock": "npm run test:e2e:mock -w @e-com/frontend",
+    "test:e2e:frontend:smoke": "npm run test:e2e:smoke -w @e-com/frontend",
+    "test:backend": "npm run test:unit:backend && npm run test:e2e:backend",
+    "test:frontend": "npm run test:unit:frontend && npm run test:e2e:frontend"
   },
   "devDependencies": {
     "typescript": "^5.4.0"
