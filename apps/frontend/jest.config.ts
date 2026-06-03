@@ -10,7 +10,7 @@ const config: Config = {
     "^server-only$": "<rootDir>/__tests__/__mocks__/server-only.ts",
     "^@/(.*)$": "<rootDir>/$1",
   },
-  testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
+  testMatch: ["**/__tests__/**/?(*.)+(spec|test).[jt]s?(x)"],
 };
 
 export default createJestConfig(config);
