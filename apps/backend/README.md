@@ -1,98 +1,234 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Backend — NestJS REST API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+The backend is a NestJS application serving a REST API for the e-commerce platform. It connects to a PostgreSQL database via TypeORM.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+**Runs on:** `http://localhost:3001` (default)
 
-## Description
+## Architecture
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+The app follows NestJS's feature-module pattern. Each domain area is a self-contained module with its own controller, service, entities, and DTOs.
 
-## Project setup
-
-```bash
-$ npm install
+```
+src/
+├── auth/         # JWT auth, refresh token rotation, role guard
+├── products/     # Product CRUD, search, filtering, pagination
+├── categories/   # Category listing
+├── cart/         # Per-user cart management
+├── orders/       # Checkout and order history
+├── db/
+│   ├── migrations/      # TypeORM schema migrations
+│   ├── seeds/           # Development/test data seeding
+│   └── typeorm.config.ts
+└── main.ts       # Bootstrap: CORS, global validation pipe
 ```
 
-## Compile and run the project
+### Data Model
 
-```bash
-# development
-$ npm run start
+[View interactive diagram on dbdiagram.io](https://dbdiagram.io/d/69c4fab0fb2db18e3b0d2095)
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```
+User ──< Order ──< OrderItem >── Product
+User ──< CartItem >──────────── Product
+Product >── Category
 ```
 
-## Run tests
+| Entity | Key fields |
+|---|---|
+| `User` | `id`, `email`, `passwordHash`, `name`, `role` (CUSTOMER \| ADMIN) |
+| `Product` | `id`, `name`, `slug` (unique), `description`, `price`, `stock`, `imageUrl`, `categoryId` |
+| `Category` | `id`, `name`, `slug` |
+| `CartItem` | `id`, `userId`, `productId`, `quantity` |
+| `Order` | `id`, `userId`, `status`, `total` |
+| `OrderItem` | `id`, `orderId`, `productId`, `quantity`, `unitPrice` |
+| `RefreshToken` | Tracks invalidated tokens for logout |
 
+Order lifecycle: `PENDING → PAID → SHIPPED → DELIVERED` (or `CANCELLED`)
+
+### Authentication
+
+- Login issues a short-lived JWT access token (15 min) and a long-lived refresh token (7 days).
+- The refresh token is stored in an httpOnly cookie.
+- `POST /auth/refresh` rotates the token — the old one is invalidated on use.
+- Routes are protected with `JwtAuthGuard`; admin-only routes additionally use `RolesGuard`.
+
+## Local Setup
+
+**1. Install dependencies** (from repo root):
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+**2. Create your env file:**
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+cp .env.example .env
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Edit `.env` with your local values (see [Environment Variables](#environment-variables) below).
 
-## Resources
+**3. Run migrations:**
+```bash
+npm run migration:run
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+**4. (Optional) Seed development data:**
+```bash
+npm run seed:local
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+**5. Start the server:**
+```bash
+npm run start:dev
+```
 
-## Support
+## Environment Variables
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Copy `.env.example` to `.env`. All variables are required unless marked optional.
 
-## Stay in touch
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `JWT_SECRET` | Secret for signing JWT tokens (use a long random string) |
+| `NODE_ENV` | `local` \| `test` \| `production` |
+| `PORT` | Port to listen on (default `3001`) |
+| `FRONTEND_URL` | Frontend origin for CORS (e.g. `http://localhost:3000`) |
+| `ADMIN_EMAIL` | _(optional)_ Bootstrap admin email — created on startup if missing |
+| `ADMIN_PASSWORD` | _(optional)_ Bootstrap admin password |
+| `ADMIN_NAME` | _(optional)_ Bootstrap admin display name |
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+> **Supabase note:** Use port `6543` in `DATABASE_URL` for the transaction-mode pooler.
 
-## License
+## Database
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Migrations
+
+```bash
+# Generate a migration from entity changes
+npm run migration:generate
+
+# Apply pending migrations
+npm run migration:run
+
+# Roll back the last migration
+npm run migration:revert
+```
+
+### Seeding
+
+Seeds populate the database with categories, products, and a default customer account for development or testing.
+
+```bash
+npm run seed:local   # Uses .env
+npm run seed:test    # Uses .env.test
+npm run seed:prod    # Uses .env.prod
+```
+
+## API Reference
+
+All endpoints are prefixed with the backend base URL. Protected routes require a `Bearer <token>` Authorization header.
+
+### Auth
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `POST` | `/auth/register` | — | Register a new user |
+| `POST` | `/auth/login` | — | Login; returns access token + sets refresh cookie |
+| `POST` | `/auth/refresh` | — | Rotate refresh token; returns new access token |
+| `POST` | `/auth/logout` | JWT | Invalidate refresh token |
+| `GET` | `/auth/me` | JWT | Get current user |
+| `PATCH` | `/auth/users/:id/role` | Admin | Update a user's role |
+
+**Register / Login body:**
+```json
+{ "email": "user@example.com", "password": "secret", "name": "Alice" }
+```
+
+**Login response:**
+```json
+{ "accessToken": "eyJ..." }
+```
+
+---
+
+### Products
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `GET` | `/products` | — | List products with filters |
+| `GET` | `/products/:slug` | — | Get a single product |
+| `POST` | `/products` | Admin | Create a product |
+| `PATCH` | `/products/:id` | Admin | Update a product |
+
+**GET /products query parameters:**
+
+| Param | Type | Description |
+|---|---|---|
+| `search` | string | Case-insensitive search on name & description |
+| `category` | string | Category slug |
+| `minPrice` | number | Minimum price |
+| `maxPrice` | number | Maximum price |
+| `sort` | `price_asc` \| `price_desc` \| `newest` \| `oldest` | Sort order |
+| `page` | number | Page number (default `1`) |
+| `limit` | number | Items per page (default `24`) |
+
+**Response shape:**
+```json
+{
+  "data": [{ "id": "...", "name": "...", "slug": "...", "price": "29.99", "stock": 10, ... }],
+  "total": 120,
+  "page": 1,
+  "limit": 24
+}
+```
+
+---
+
+### Categories
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `GET` | `/categories` | — | List all categories |
+
+---
+
+### Cart
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `GET` | `/cart` | JWT | Get the current user's cart |
+| `POST` | `/cart` | JWT | Add an item |
+| `PATCH` | `/cart/:itemId` | JWT | Update item quantity |
+| `DELETE` | `/cart/:itemId` | JWT | Remove an item (returns 204) |
+
+**POST /cart body:** `{ "productId": "uuid", "quantity": 2 }`  
+**PATCH /cart/:itemId body:** `{ "quantity": 3 }`
+
+---
+
+### Orders
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `POST` | `/orders/checkout` | JWT | Convert cart to an order |
+| `GET` | `/orders` | JWT | List current user's orders |
+| `GET` | `/orders/:id` | JWT | Get a specific order |
+
+## Testing
+
+```bash
+# Unit tests
+npm run test
+
+# Unit tests in watch mode
+npm run test:watch
+
+# Unit test coverage
+npm run test:coverage
+
+# E2E tests (requires .env.test and a running test DB)
+npm run test:e2e
+
+# Unit + E2E tests
+npm run test:all
+```
+
+Unit tests live alongside their source files as `*.spec.ts`. E2E tests live in `test/` and use Supertest against a real database.
