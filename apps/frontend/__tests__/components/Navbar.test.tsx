@@ -7,6 +7,7 @@ import { renderWithQuery, mockCartItem } from "../test-utils";
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
   useSearchParams: () => new URLSearchParams(),
+  usePathname: () => "/products",
 }));
 
 const logoutMutateMock = jest.fn();

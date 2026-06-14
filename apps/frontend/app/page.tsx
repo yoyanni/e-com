@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { HeroNav } from "../components/Navbar/HeroNav";
 
 const trustItems = [
   { icon: "🚚", title: "Free Shipping", description: "On orders over $50" },
@@ -18,9 +19,11 @@ const trustItems = [
 
 export default function Home() {
   return (
-    <div className="-mx-8 -mt-4">
+    <div className="-mx-8 -mt-14 -mb-4">
       {/* Hero */}
-      <section className="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden bg-white px-8 text-center">
+      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-white px-8 text-center">
+        <HeroNav />
+
         {/* Subtle radial colour blobs */}
         <div className="pointer-events-none absolute inset-0">
           <div

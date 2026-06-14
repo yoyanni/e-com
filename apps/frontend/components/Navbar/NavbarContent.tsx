@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SubmitEvent, Suspense, useRef } from "react";
+import { SubmitEvent, useRef } from "react";
 import { ShoppingCart } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 
-function NavbarContent() {
+export function NavbarContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -35,7 +35,7 @@ function NavbarContent() {
   }
 
   return (
-    <NavbarContainer>
+    <>
       <form onSubmit={handleSearch} className="flex flex-1 items-center gap-2">
         <Input
           ref={inputRef}
@@ -81,38 +81,18 @@ function NavbarContent() {
         ) : (
           <>
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/login" prefetch={false}>Login</Link>
+              <Link href="/login" prefetch={false}>
+                Login
+              </Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/register" prefetch={false}>Register</Link>
+              <Link href="/register" prefetch={false}>
+                Register
+              </Link>
             </Button>
           </>
         )}
       </nav>
-    </NavbarContainer>
-  );
-}
-
-function NavbarContainer({ children }: { children?: React.ReactNode }) {
-  return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="container mx-auto flex h-14 items-center gap-4 px-4">
-        <Link
-          href="/"
-          className="mr-4 shrink-0 text-lg font-bold tracking-tight"
-        >
-          E-com
-        </Link>
-        {children}
-      </div>
-    </header>
-  );
-}
-
-export function Navbar() {
-  return (
-    <Suspense fallback={<NavbarContainer />}>
-      <NavbarContent />
-    </Suspense>
+    </>
   );
 }
