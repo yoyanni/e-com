@@ -27,7 +27,7 @@ const ProductsPage = async ({
   const categories = await fetchCategories();
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="mt-4 mx-auto max-w-7xl">
       <h1 className="mb-6 text-2xl font-bold">
         {params.search ? `Results for "${params.search}"` : "All Products"}
       </h1>

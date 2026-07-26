@@ -9,10 +9,10 @@ export const metadata: Metadata = {
 
 const RegisterPage = () => {
   return (
-    <main className="mx-auto w-full max-w-md p-6">
+    <div className="w-full max-w-md p-6">
       <h1 className="text-2xl font-semibold">Create account</h1>
       <RegisterForm />
-    </main>
+    </div>
   );
 };
 
