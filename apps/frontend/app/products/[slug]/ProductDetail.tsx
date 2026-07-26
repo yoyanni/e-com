@@ -44,7 +44,7 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
   return (
     <div className="grid gap-8 md:grid-cols-2">
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-accent">
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
@@ -55,7 +55,7 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
             priority
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
+          <div className="flex h-full w-full items-center justify-center text-sm text-accent-foreground/70">
             No image
           </div>
         )}

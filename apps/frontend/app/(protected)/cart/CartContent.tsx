@@ -41,7 +41,7 @@ export function CartContent() {
             className="flex items-center gap-4 rounded-lg border p-4"
           >
             {/* Product image */}
-            <div className="relative size-20 shrink-0 overflow-hidden rounded-md bg-muted">
+            <div className="relative size-20 shrink-0 overflow-hidden rounded-md bg-accent">
               {item.product?.imageUrl ? (
                 <Image
                   src={item.product.imageUrl}
@@ -51,7 +51,7 @@ export function CartContent() {
                   sizes="80px"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                <div className="flex h-full w-full items-center justify-center text-xs text-accent-foreground/70">
                   No image
                 </div>
               )}

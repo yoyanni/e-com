@@ -16,8 +16,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <Link href={`/products/${product.slug}`} className="group">
-      <Card className="h-full overflow-hidden transition-shadow hover:shadow-md">
-        <div className="relative aspect-square overflow-hidden bg-muted">
+      <Card className="h-full overflow-hidden pt-0">
+        <div className="relative aspect-square overflow-hidden bg-accent">
           {product.imageUrl ? (
             <Image
               src={product.imageUrl}
@@ -27,7 +27,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
+            <div className="flex h-full w-full items-center justify-center text-sm text-accent-foreground/70">
               No image
             </div>
           )}

@@ -13,9 +13,9 @@ export default async function CheckoutSuccessPage({
 
   return (
     <div className="container mx-auto max-w-md py-20 flex flex-col items-center gap-6 text-center">
-      <div className="rounded-full bg-green-100 p-4">
+      <div className="rounded-full bg-primary/10 p-4">
         <svg
-          className="size-10 text-green-600"
+          className="size-10 text-primary"
           fill="none"
           stroke="currentColor"
           strokeWidth={2}
