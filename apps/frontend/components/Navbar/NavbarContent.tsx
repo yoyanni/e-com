@@ -8,6 +8,7 @@ import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 
@@ -48,6 +49,7 @@ export function NavbarContent() {
       </form>
 
       <nav className="ml-auto flex items-center gap-2">
+        <ThemeToggle />
         <Button variant="ghost" size="icon" asChild aria-label="Cart">
           <Link href="/cart" prefetch={false} className="relative">
             <ShoppingCart className="size-5" />

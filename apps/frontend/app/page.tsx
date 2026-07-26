@@ -21,39 +21,39 @@ export default function Home() {
   return (
     <div className="-mx-8 -mt-14 -mb-4">
       {/* Hero */}
-      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-white px-8 text-center">
+      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-8 text-center">
         <HeroNav />
 
         {/* Subtle radial colour blobs */}
         <div className="pointer-events-none absolute inset-0">
           <div
-            className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-violet-200/50 blur-3xl"
+            className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-violet-200/50 blur-3xl dark:bg-violet-500/20"
             style={{ animation: "blob-float 8s ease-in-out infinite" }}
           />
           <div
-            className="absolute -top-16 right-0 h-80 w-80 rounded-full bg-sky-200/50 blur-3xl"
+            className="absolute -top-16 right-0 h-80 w-80 rounded-full bg-sky-200/50 blur-3xl dark:bg-sky-500/20"
             style={{ animation: "blob-float 10s ease-in-out infinite 2s" }}
           />
           <div
-            className="absolute bottom-0 left-1/2 h-64 w-96 -translate-x-1/2 rounded-full bg-rose-100/60 blur-3xl"
+            className="absolute bottom-0 left-1/2 h-64 w-96 -translate-x-1/2 rounded-full bg-rose-100/60 blur-3xl dark:bg-rose-500/15"
             style={{ animation: "blob-float 12s ease-in-out infinite 4s" }}
           />
         </div>
         <div className="z-10 flex flex-col items-center">
           <p
-            className="mb-3 text-sm font-semibold uppercase tracking-widest text-slate-400"
+            className="mb-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground"
             style={{ animation: "fade-up 0.6s ease-out both" }}
           >
             New arrivals every week
           </p>
           <h1
-            className="mb-6 max-w-3xl text-5xl font-bold leading-tight tracking-tight text-slate-900"
+            className="mb-6 max-w-3xl text-5xl font-bold leading-tight tracking-tight text-foreground"
             style={{ animation: "fade-up 0.6s ease-out 0.15s both" }}
           >
             Discover Products You&apos;ll Love
           </h1>
           <p
-            className="mb-10 max-w-xl text-lg text-slate-500"
+            className="mb-10 max-w-xl text-lg text-muted-foreground"
             style={{ animation: "fade-up 0.6s ease-out 0.3s both" }}
           >
             Browse our ever-growing catalogue of handpicked items — great
