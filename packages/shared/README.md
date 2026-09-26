@@ -1,5 +1,6 @@
-# Intro
+# @e-com/shared
 
-This shared package will only export typescript related details.
+TypeScript types and runtime constants (`UserRole`, `OrderStatus`, `AUTH_CONSTANTS`) used by both apps. It compiles to CommonJS in `dist/`. Run `npm run build -w @e-com/shared` after every change.
 
-It will not build anything but will be included in consumers (via TS Path Aliases) to be built with their build process.
+- For what it exports, see [docs/architecture.md](../../docs/architecture.md#shared-package).
+- For why it's compiled, see [decision 0003](../../docs/decisions/0003-shared-package-compiled-to-commonjs.md).
