@@ -9,4 +9,10 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  /** Liveness only: no DB roundtrip, so it stays cheap on the constrained VPS. */
+  @Get('health')
+  health(): { status: 'ok' } {
+    return { status: 'ok' };
+  }
 }

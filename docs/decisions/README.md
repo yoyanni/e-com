@@ -11,9 +11,11 @@ Short records of choices the code can't explain on its own. Add a record when a 
 | [0001](0001-bff-route-handlers-hold-tokens.md) | Next.js route handlers hold the tokens in httpOnly cookies | Accepted |
 | [0002](0002-refresh-token-rotation-with-families.md) | Refresh tokens rotate on every use, with reuse detection by family | Accepted |
 | [0003](0003-shared-package-compiled-to-commonjs.md) | `@e-com/shared` is compiled to CommonJS, not consumed as source | Accepted |
-| [0004](0004-schema-via-migrations-run-on-startup.md) | Schema comes only from migrations, applied on app startup | Accepted |
+| [0004](0004-schema-via-migrations-run-on-startup.md) | Schema comes only from migrations, applied on app startup | Superseded by 0008 |
 | [0005](0005-two-playwright-suites.md) | Two Playwright suites: mocked and smoke | Accepted |
 | [0006](0006-two-layer-route-protection.md) | Protected routes are guarded by `proxy.ts` and by a client `RouteGuard` | Accepted |
+| [0007](0007-backend-in-docker-on-shared-vps.md) | Backend runs as a Docker image on a shared VPS | Accepted |
+| [0008](0008-migrations-run-explicitly.md) | Migrations run by an explicit command, not on startup | Accepted |
 
 Records 0001–0006 were written after the fact, on 2026-09-26, from the code, code comments and commit messages. Each one's date is the date of the commit that introduced the decision.
 

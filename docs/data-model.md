@@ -113,10 +113,10 @@ erDiagram
 
 ## Migrations
 
-[`src/db/typeorm.config.ts`](../apps/backend/src/db/typeorm.config.ts) defines the one `DataSource` that the app, the TypeORM CLI and the seed all use ([decision 0004](decisions/0004-schema-via-migrations-run-on-startup.md)):
+[`src/db/typeorm.config.ts`](../apps/backend/src/db/typeorm.config.ts) defines the one `DataSource` that the app, the TypeORM CLI and the seed all use ([decision 0008](decisions/0008-migrations-run-explicitly.md)):
 
 - `synchronize: false`, so entity changes do nothing until you write a migration.
-- `migrationsRun: true`, so pending migrations are applied **every time the app starts**, including in tests and production.
+- **Starting the app never applies migrations.** You run them with a script, in every environment, including tests and production.
 - Migrations are `.js` files. `nest-cli.json` copies them into `dist/`, and they're loaded from `dist/db/migrations` when `NODE_ENV=production` and from `src/db/migrations` otherwise.
 
 ```mermaid
@@ -124,9 +124,9 @@ flowchart LR
   edit["Change an entity<br/>src/entities/*.ts"] --> gen["npm run migration:generate<br/>diffs entities against the DB"]
   gen --> file["New .js migration<br/>src/db/migrations/"]
   file --> commit["Commit it"]
-  commit --> start{"App starts<br/>migrationsRun: true"}
-  start -->|"NODE_ENV=production"| dist["Load dist/db/migrations"]
-  start -->|"otherwise"| src["Load src/db/migrations"]
+  commit --> run{"Run a migration script"}
+  run -->|"migration:run:prod<br/>(in the container)"| dist["Load dist/db/migrations"]
+  run -->|"migration:run / migration:run:test"| src["Load src/db/migrations"]
   dist --> apply[("Pending migrations applied")]
   src --> apply
 ```
@@ -138,6 +138,12 @@ npm run migration:generate -w @e-com/backend   # diff entities against the DB an
 npm run migration:run -w @e-com/backend        # apply pending migrations
 npm run migration:revert -w @e-com/backend     # undo the last one
 ```
+
+| Script | Database | Runs through |
+| --- | --- | --- |
+| `migration:run` | `.env` | `ts-node` and `src/` |
+| `migration:run:test` | `.env.test` | `ts-node` and `src/` |
+| `migration:run:prod` | the container's `DATABASE_URL` | the `typeorm` CLI and the compiled `dist/`. Needs a build, and it's the only one that works in the production image ([deployment.md](deployment.md#migrations)) |
 
 ## Seeding
 

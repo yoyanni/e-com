@@ -8,6 +8,12 @@ import { CartItem } from '../entities/cart-item.entity';
 import { Order } from '../entities/order.entity';
 import { OrderItem } from '../entities/order-item.entity';
 
+if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not defined');
+
+/**
+ * SSL comes from the connection string (e.g. `?sslmode=require`), not from here.
+ * Migrations never run on startup: use the `migration:run*` scripts.
+ */
 export default new DataSource({
   type: 'postgres',
   url: process.env.DATABASE_URL,
@@ -18,9 +24,4 @@ export default new DataSource({
       ? 'dist/db/migrations/*.js'
       : 'src/db/migrations/*.js',
   ],
-  ssl:
-    process.env.NODE_ENV === 'production'
-      ? { rejectUnauthorized: false }
-      : false,
-  migrationsRun: true,
 });

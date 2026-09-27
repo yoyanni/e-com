@@ -12,7 +12,7 @@ Pick a doc by what you're trying to do.
 | [frontend.md](frontend.md) | add a page, change data fetching or caching, or work with the query hooks |
 | [configuration.md](configuration.md) | set or add an environment variable |
 | [testing.md](testing.md) | run, write or debug unit, e2e or Playwright tests |
-| [deployment.md](deployment.md) | ship the frontend to Vercel or the backend to Render |
+| [deployment.md](deployment.md) | ship the frontend to Vercel, or build and run the backend's Docker image on the VPS |
 | [issues.md](issues.md) | find a known bug or gap to fix |
 | [decisions/](decisions/README.md) | find out why something is built the way it is |
 

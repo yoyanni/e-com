@@ -8,9 +8,9 @@ A full-stack e-commerce app in an npm-workspaces monorepo. Shoppers browse and f
 | --- | --- |
 | Frontend | Next.js 16 (App Router), React 19, TanStack Query v5, Axios, Tailwind CSS v4, shadcn/ui |
 | Backend | NestJS 11, TypeORM 0.3, Passport JWT |
-| Database | PostgreSQL (Supabase in production) |
+| Database | PostgreSQL (a Docker Compose container in production) |
 | Shared | `@e-com/shared`: TypeScript types and constants used by both apps |
-| Hosting | Vercel (frontend), Render (backend) |
+| Hosting | Vercel (frontend), Docker on a shared VPS behind Caddy (backend) |
 
 ## How it fits together
 
@@ -21,7 +21,7 @@ flowchart LR
         BFF["Route handlers<br/>/api/*<br/><i>tokens in httpOnly cookies</i>"]
         RSC["Server Components"]
     end
-    API["NestJS API (Render)"]
+    API["NestJS API (Docker on VPS)"]
     DB[("PostgreSQL")]
 
     Browser -- "axios" --> BFF

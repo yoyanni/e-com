@@ -1,5 +1,12 @@
 import { IProductsQuery } from '@e-com/shared';
-import { IsIn, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class GetProductsQueryDto implements Partial<
   Record<keyof IProductsQuery, string | number>
@@ -34,5 +41,6 @@ export class GetProductsQueryDto implements Partial<
   @IsOptional()
   @IsNumber()
   @Min(1)
+  @Max(100)
   limit?: number = 24;
 }

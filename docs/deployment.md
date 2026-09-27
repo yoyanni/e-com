@@ -3,29 +3,63 @@
 | Part | Host | Config in repo |
 | --- | --- | --- |
 | Frontend (Next.js) | Vercel | [`vercel.json`](../vercel.json) |
-| Backend (NestJS) | Render | none. The build and start commands are set in the Render dashboard |
-| Database | Supabase Postgres | none |
+| Backend (NestJS) | Docker container on a shared VPS, behind Caddy | [`Dockerfile`](../Dockerfile), [`.dockerignore`](../.dockerignore) |
+| Database | Postgres container in the same Docker Compose stack | none. Compose lives on the server |
+
+Why the backend moved off Render and Supabase: [decision 0007](decisions/0007-backend-in-docker-on-shared-vps.md).
 
 ## Frontend on Vercel
 
 `vercel.json` runs `npm ci`, then `npm run build:vercel`, and serves `apps/frontend/.next`. `build:vercel` builds `@e-com/shared` **before** `@e-com/frontend`, because the frontend imports the compiled `dist/` ([decision 0003](decisions/0003-shared-package-compiled-to-commonjs.md)).
 
-Set `BACKEND_URL` in the Vercel project to the public Render URL. The browser only ever talks to Vercel, and the route handlers call Render from the server ([architecture.md](architecture.md#request-paths)).
+Set `BACKEND_URL` in the Vercel project to the backend's public URL, `https://ecom-api.<domain>`. The browser only ever talks to Vercel, and the route handlers call the backend from the server ([architecture.md](architecture.md#request-paths)).
 
-## Backend on Render
+## Backend image
 
-Render deploys from git. The service needs:
+The [`Dockerfile`](../Dockerfile) is at the repo root, because the backend needs the `@e-com/shared` workspace. It has two stages:
 
-- **Build:** build `@e-com/shared`, then `@e-com/backend`. `nest build` copies the `.js` migrations into `dist/`.
-- **Start:** run `dist/main` with the environment variables set in the dashboard, for example `node dist/main`. `start:prod` loads `.env.prod` with `node --env-file`, and Node exits if that file doesn't exist.
-- **Environment:** `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, `FRONTEND_URL`, and optionally the `ADMIN_*` variables. See [configuration.md](configuration.md#backend-appsbackend).
+1. **build:** installs the backend's and shared package's dependencies, dev ones included, then builds `@e-com/shared` and `@e-com/backend`. `nest build` copies the `.js` migrations into `dist/`.
+2. **runtime:** `node:22-alpine` with production dependencies only, plus the two `dist/` folders. It runs as the `node` user from `/app/apps/backend`, so the relative `dist/db/migrations` path in the TypeORM config resolves. `CMD` is `node dist/main.js`.
 
-`NODE_ENV=production` is what turns on SSL for the database connection and makes TypeORM load migrations from `dist/db/migrations`.
+Every workspace's `package.json` is copied into both stages, the frontend's included, because `npm ci` checks all of them against the lockfile. [`.dockerignore`](../.dockerignore) keeps everything else from the frontend out of the build context, along with `node_modules`, `dist`, `docs` and every `.env*` file.
 
-**Migrations run automatically every time the backend starts** (`migrationsRun: true`), so a deploy applies any new migrations before the app starts serving. There's no separate migration step to run or skip ([decision 0004](decisions/0004-schema-via-migrations-run-on-startup.md)).
+The image contains no configuration. Everything comes from the environment when the container starts.
 
-## Database on Supabase
+To build and run it locally:
 
-Use Supabase's transaction-mode pooler connection string for `DATABASE_URL` ([configuration.md](configuration.md#backend-appsbackend)).
+```bash
+docker build -t ecom-api .
+docker run --rm -p 3000:3000 --memory=256m \
+  -e NODE_OPTIONS=--max-old-space-size=192 -e PORT=3000 -e NODE_ENV=production \
+  -e DATABASE_URL=... -e JWT_SECRET=... -e CORS_ORIGIN=... \
+  ecom-api
+```
 
-`npm run seed:prod -w @e-com/backend` runs the seed against the database in `apps/backend/.env.prod`. It **deletes all orders and products** before inserting sample data ([data-model.md](data-model.md#seeding), [issue O1](issues.md#o1-seedprod-wipes-production-orders-and-products)).
+## Backend on the VPS
+
+On a push to `main`, GitHub Actions builds the `Dockerfile`, pushes the image to `ghcr.io/<github-user>/ecom-api`, then SSHes into the VPS and runs `docker compose pull ecom-api && docker compose up -d ecom-api`. The workflow isn't in this repo yet ([O3](issues.md#o3-the-backend-deploy-workflow-isnt-in-the-repo)).
+
+The container runs:
+
+- **Environment:** see [configuration.md](configuration.md#backend-appsbackend) for what each variable does.
+  - Compose sets `DATABASE_URL` (pointing at the `postgres` service) and `NODE_OPTIONS`.
+  - The server's `env/ecom.env` file sets `PORT=3000`, `NODE_ENV=production`, `JWT_SECRET`, `CORS_ORIGIN` (the exact Vercel URL), and optionally the `ADMIN_*` variables.
+  - The app refuses to start without `DATABASE_URL`, `JWT_SECRET`, or (in production) `CORS_ORIGIN`.
+- **Memory:** a 256 MB container limit with `NODE_OPTIONS=--max-old-space-size=192`. The box is shared with another API, so avoid in-memory caches and unbounded queries. Paginated endpoints cap `limit` at 100.
+- **TLS:** Caddy terminates HTTPS at `https://ecom-api.<domain>` and proxies plain HTTP to the container. The app has no TLS handling of its own, and the connection to the Compose Postgres doesn't use SSL.
+- **Disk:** none that survives. The VPS is destroyed and rebuilt between uses, so the app logs to stdout only and must not write files. Anything that needs storage goes to external object storage.
+- **Health check:** `GET /health` returns `200 {"status":"ok"}` without touching the database, so Caddy or Compose can poll it cheaply.
+
+### Migrations
+
+**Starting the container never changes the schema** ([decision 0008](decisions/0008-migrations-run-explicitly.md)). After deploying an image that includes a new migration, and on a fresh database, run:
+
+```bash
+docker compose run --rm ecom-api npm run migration:run:prod
+```
+
+It uses the compiled `dist/db/typeorm.config.js` and the same environment as the service. Until it runs, the app serves against the old schema.
+
+### Seeding
+
+`npm run seed:prod -w @e-com/backend` can't reach the Compose Postgres from a laptop, and the image can't seed either ([O2](issues.md#o2-the-production-image-cant-seed)). The seed **deletes all orders and products** before inserting sample data ([data-model.md](data-model.md#seeding), [O1](issues.md#o1-seedprod-wipes-production-orders-and-products)).

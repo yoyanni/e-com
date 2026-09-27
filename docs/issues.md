@@ -1,6 +1,6 @@
 # Known issues
 
-Compiled on **2026-09-26** by reading the code at v1.2.0. When you fix an item, delete it in the same commit. When a doc turns out not to match the code, add an item here.
+Compiled on **2026-09-26** by reading the code at v1.2.0. O2 and O3 added on **2026-09-27** with the move to the VPS ([deployment.md](deployment.md)). When you fix an item, delete it in the same commit. When a doc turns out not to match the code, add an item here.
 
 **Severity**
 
@@ -72,13 +72,6 @@ IDs by category: **B** bugs, **S** security, **O** operations, **T** tooling. ID
 - **Problem:** `/auth/login` and `/auth/register` accept unlimited attempts, which leaves room for password guessing and account-creation spam.
 - **Fix:** Add `@nestjs/throttler` to the auth routes, then document the limits in [api.md](api.md#auth).
 
-### S2. `limit` on product listing is unbounded
-
-- **Severity:** Low
-- **Where:** [get-products-query.dto.ts:37](../apps/backend/src/products/dto/get-products-query.dto.ts#L37)
-- **Problem:** `GET /products?limit=1000000` returns the whole table in one response.
-- **Fix:** Add `@Max(100)` or similar, and update the query table in [api.md](api.md#products).
-
 ## Operations
 
 ### O1. `seed:prod` wipes production orders and products
@@ -87,6 +80,20 @@ IDs by category: **B** bugs, **S** security, **O** operations, **T** tooling. ID
 - **Where:** [seed.ts:25](../apps/backend/src/db/seeds/seed.ts#L25), [apps/backend/package.json:25](../apps/backend/package.json#L25)
 - **Problem:** The seed starts by deleting every order, order item, product and category, and through the cascade every cart item. `npm run seed:prod` does this to the production database without asking for confirmation.
 - **Fix:** Refuse to run when `NODE_ENV=production` unless a flag such as `--force` is passed, or remove `seed:prod`. Update [data-model.md](data-model.md#seeding) and [deployment.md](deployment.md).
+
+### O2. The production image can't seed
+
+- **Severity:** Low
+- **Where:** [seed.ts](../apps/backend/src/db/seeds/seed.ts), [Dockerfile](../Dockerfile)
+- **Problem:** The seed runs through `ts-node` and uses `@faker-js/faker`, which are both dev dependencies and so aren't in the image. `seed:prod` from a laptop can't reach the Compose Postgres, which isn't exposed. A fresh VPS has no way to get sample data.
+- **Fix:** Decide whether the demo needs seed data. If it does, move `@faker-js/faker` to `dependencies` and add a script that runs the compiled `dist/db/seeds/seed.js`, with the [O1](#o1-seedprod-wipes-production-orders-and-products) guard in place first.
+
+### O3. The backend deploy workflow isn't in the repo
+
+- **Severity:** Low
+- **Where:** `.github/workflows/deploy.yml` (missing)
+- **Problem:** [deployment.md](deployment.md#backend-on-the-vps) describes GitHub Actions building the image, pushing it to GHCR and running `docker compose pull`/`up` over SSH, but no workflow exists yet, so pushes to `main` don't deploy the backend.
+- **Fix:** Add the workflow, then remove the "isn't in this repo yet" note from [deployment.md](deployment.md).
 
 ## Tooling
 
@@ -118,9 +125,9 @@ IDs by category: **B** bugs, **S** security, **O** operations, **T** tooling. ID
 - **Problem:** `PROTECTED_ROUTES` includes `/orders`, which isn't a route and isn't in `config.matcher`. The two lists have to be kept in sync by hand.
 - **Fix:** Remove `/orders`, and build `matcher` from the same constants if Next.js allows it (the matcher must be static).
 
-### T5. `dotenv` is used but not declared
+### T5. `dotenv` is used but not declared in the frontend
 
 - **Severity:** Low
-- **Where:** [typeorm.config.ts:1](../apps/backend/src/db/typeorm.config.ts#L1), [playwright.config.ts:2](../apps/frontend/playwright.config.ts#L2), [playwright.mocked.config.ts:2](../apps/frontend/playwright.mocked.config.ts#L2)
-- **Problem:** `dotenv` only resolves because other packages install it transitively. A dependency upgrade could remove it and break migrations, seeds and Playwright.
-- **Fix:** Add `dotenv` to the backend's `dependencies` and the frontend's `devDependencies`.
+- **Where:** [playwright.config.ts:2](../apps/frontend/playwright.config.ts#L2), [playwright.mocked.config.ts:2](../apps/frontend/playwright.mocked.config.ts#L2)
+- **Problem:** `dotenv` only resolves because other packages install it transitively. A dependency upgrade could remove it and break Playwright. The backend declares it.
+- **Fix:** Add `dotenv` to the frontend's `devDependencies`.

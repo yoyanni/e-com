@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Node.js 20 or later and npm 10 or later (enforced by `engines` in the root [`package.json`](../package.json))
-- A PostgreSQL database. A local Postgres works, and so does a Supabase project.
+- A PostgreSQL database. A local Postgres works, and so does a hosted one such as Supabase (add `sslmode` to `DATABASE_URL`, see [configuration.md](configuration.md#backend-appsbackend)).
 
 ## First-time setup
 
@@ -28,7 +28,7 @@ Run every command from the repo root.
    cp apps/frontend/.env.example apps/frontend/.env
    ```
 
-4. **Create the schema.** Migrations also run automatically each time the backend starts ([data-model.md](data-model.md#migrations)), so this step is optional. Running it yourself shows you any errors up front.
+4. **Create the schema.** The backend never applies migrations when it starts ([data-model.md](data-model.md#migrations)), so run this now and again whenever a new migration lands.
 
    ```bash
    npm run migration:run -w @e-com/backend

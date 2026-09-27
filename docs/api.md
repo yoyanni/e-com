@@ -47,7 +47,7 @@ Source: [`products.controller.ts`](../apps/backend/src/products/products.control
 | `minPrice`, `maxPrice` | number ≥ 0 | — | Inclusive price bounds |
 | `sort` | `newest` \| `oldest` \| `price_asc` \| `price_desc` | `newest` | Any other value returns `400` |
 | `page` | int ≥ 1 | `1` | |
-| `limit` | int ≥ 1 | `24` | |
+| `limit` | int 1–100 | `24` | Above 100 returns `400`, to keep responses within the container's memory budget |
 
 ```json
 {
@@ -109,6 +109,8 @@ Checkout runs in one transaction. It loads the cart, returns `400 Cart is empty`
 ### Other
 
 `GET /` returns the string `Hello World!`.
+
+`GET /health` returns `200 {"status":"ok"}`. It doesn't touch the database, so it only shows that the process is up ([deployment.md](deployment.md#backend-on-the-vps)).
 
 ## Next.js route handlers (BFF)
 

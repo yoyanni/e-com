@@ -12,7 +12,7 @@ npm run dev:frontend               # :3000
 npm run lint                       # ESLint in all workspaces (the backend lint auto-fixes)
 npm run build                      # also type-checks both apps
 npm test                           # unit tests, no database needed
-npm run test:e2e:backend           # needs apps/backend/.env.test (real database, truncated on every test)
+npm run test:e2e:backend           # needs apps/backend/.env.test and `migration:run:test` (real database, truncated on every test)
 npm run test:e2e:frontend:mock     # Playwright, no backend needed
 ```
 
@@ -28,7 +28,7 @@ Read the relevant doc before changing that area, and update it in the same chang
 - [docs/frontend.md](docs/frontend.md): routes, data fetching, caching, hooks, UI
 - [docs/configuration.md](docs/configuration.md): every environment variable
 - [docs/testing.md](docs/testing.md): unit, e2e and Playwright suites
-- [docs/deployment.md](docs/deployment.md): Vercel, Render, Supabase
+- [docs/deployment.md](docs/deployment.md): Vercel, the backend Docker image, the VPS
 - [docs/issues.md](docs/issues.md): known bugs and gaps
 - [docs/decisions/](docs/decisions/README.md): why things are the way they are
 
@@ -36,9 +36,10 @@ Read the relevant doc before changing that area, and update it in the same chang
 
 - **Frontend:** Middleware lives in `apps/frontend/proxy.ts`.
 - **Shared package:** after editing `packages/shared/src`, rebuild it. The apps import the compiled `dist/`.
-- **Entities:** after changing an entity, run `npm run migration:generate -w @e-com/backend` and commit the generated `.js` migration. `synchronize` is off, and migrations run automatically when the app starts.
+- **Entities:** after changing an entity, run `npm run migration:generate -w @e-com/backend` and commit the generated `.js` migration. `synchronize` is off, and migrations never run on startup: apply them with `migration:run` (local), `migration:run:test` (e2e DB) or `migration:run:prod` (in the container).
 - **Validation pipe:** the global `ValidationPipe` options in `apps/backend/src/main.ts` are copied in `apps/backend/test/test-helpers.ts`. Change both.
 - **Client-reachable endpoints:** a new backend endpoint that the browser needs also needs a route handler under `apps/frontend/app/api/`. The browser never calls the backend directly.
 - **Protected pages:** a new protected top-level path goes in both `PROTECTED_ROUTES` and `config.matcher` in `proxy.ts`, and the page goes under `app/(protected)/`. Links to it need `prefetch={false}`.
 - **Seeds:** never run `seed:prod`, and never point `.env.test` at a database that matters. Both wipe data.
+- **Backend runtime (VPS):** the container has a 256 MB limit and a 192 MB heap, and no disk that survives a rebuild. No unbounded queries or in-memory caches, logs to stdout only, no TLS in the app, and never hard-code or bake in secrets, `DATABASE_URL` or CORS origins. The `Dockerfile` copies every workspace's `package.json`, so a new workspace needs adding there.
 - **Docs:** delete an item from `docs/issues.md` in the same commit that fixes it. Don't edit an accepted decision record. Add a new one and mark the old one as superseded. Add any new doc to `docs/README.md` and to the list above.

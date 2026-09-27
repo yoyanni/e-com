@@ -1,0 +1,20 @@
+# Only the backend image is built from this context (see Dockerfile).
+**/node_modules
+**/dist
+**/coverage
+**/*.tsbuildinfo
+.git
+.github
+docs
+*.md
+
+# Never send env files, real or not, into the build context.
+**/.env
+**/.env.*
+
+# The frontend isn't built here, but npm ci needs its manifest for the lockfile.
+apps/frontend/*
+!apps/frontend/package.json
+
+apps/backend/bruno
+apps/backend/test

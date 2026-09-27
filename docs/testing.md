@@ -12,12 +12,12 @@ The root commands that run several suites together are listed in [getting-starte
 About the e2e suite:
 
 - It loads `.env.test` with `node --env-file` and runs in band.
-- It boots the whole `AppModule` through `createApp()` in [`test/test-helpers.ts`](../apps/backend/test/test-helpers.ts), so pending migrations run automatically.
+- It boots the whole `AppModule` through `createApp()` in [`test/test-helpers.ts`](../apps/backend/test/test-helpers.ts), which doesn't run migrations. The schema has to exist already.
 - **Every test truncates every table** in that database. Never point `.env.test` at a database whose data you want to keep.
 - `createApp()` sets up its own copy of the global `ValidationPipe`. If you change the pipe in `main.ts`, change it here too.
 - The helpers `registerAndLogin`, `loginAsAdmin`, `seedCategory` and `seedProduct` cover most setup.
 
-To set up the test database, create an empty Postgres database and then copy the template: `cp apps/backend/.env.test.example apps/backend/.env.test`. The template uses `PORT=3002`, which the frontend smoke suite relies on.
+To set up the test database, create an empty Postgres database, copy the template with `cp apps/backend/.env.test.example apps/backend/.env.test`, then create the schema with `npm run migration:run:test -w @e-com/backend`. Run that again whenever a new migration lands. The template uses `PORT=3002`, which the frontend smoke suite relies on.
 
 ## Frontend unit tests (Jest + Testing Library)
 

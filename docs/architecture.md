@@ -59,14 +59,14 @@ flowchart LR
 [`main.ts`](../apps/backend/src/main.ts) sets up:
 
 - **A global `ValidationPipe`** with `whitelist: true` (unknown body fields are stripped), `transform: true` and implicit conversion (query strings become numbers).
-- **CORS** limited to `FRONTEND_URL` with credentials. Nothing needs CORS today, because all browser traffic goes through the BFF, but it's there as a safeguard.
+- **CORS** limited to `CORS_ORIGIN` with credentials, and off when that's unset outside production ([configuration.md](configuration.md#backend-appsbackend)). Nothing needs CORS today, because all browser traffic goes through the BFF, but it's there as a safeguard.
 - **The listening port**: `PORT`, falling back to 3001.
 
 Services use TypeORM repositories directly. There is no repository layer. Checkout runs inside a `DataSource.transaction`.
 
 ```mermaid
 flowchart TD
-  main["main.ts<br/>global ValidationPipe · CORS (FRONTEND_URL) · PORT"]
+  main["main.ts<br/>global ValidationPipe · CORS (CORS_ORIGIN) · PORT"]
 
   subgraph modules["Feature modules (controller + service + DTOs)"]
     auth["auth/<br/>JWT strategy · JwtAuthGuard · RolesGuard · admin bootstrap"]

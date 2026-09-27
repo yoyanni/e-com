@@ -1,6 +1,6 @@
 # 0004. Schema comes only from migrations, applied on app startup
 
-- Status: Accepted
+- Status: Superseded by [0008](0008-migrations-run-explicitly.md)
 - Date: 2026-05-04
 
 ## Context
