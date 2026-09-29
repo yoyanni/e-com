@@ -1,6 +1,6 @@
 # Known issues
 
-Compiled on **2026-09-26** by reading the code at v1.2.0. O2 and O3 added on **2026-09-27** with the move to the VPS ([deployment.md](deployment.md)). When you fix an item, delete it in the same commit. When a doc turns out not to match the code, add an item here.
+Compiled on **2026-09-26** by reading the code at v1.2.0. O2 added on **2026-09-27** with the move to the VPS ([deployment.md](deployment.md)). When you fix an item, delete it in the same commit. When a doc turns out not to match the code, add an item here.
 
 **Severity**
 
@@ -87,13 +87,6 @@ IDs by category: **B** bugs, **S** security, **O** operations, **T** tooling. ID
 - **Where:** [seed.ts](../apps/backend/src/db/seeds/seed.ts), [Dockerfile](../Dockerfile)
 - **Problem:** The seed runs through `ts-node` and uses `@faker-js/faker`, which are both dev dependencies and so aren't in the image. `seed:prod` from a laptop can't reach the Compose Postgres, which isn't exposed. A fresh VPS has no way to get sample data.
 - **Fix:** Decide whether the demo needs seed data. If it does, move `@faker-js/faker` to `dependencies` and add a script that runs the compiled `dist/db/seeds/seed.js`, with the [O1](#o1-seedprod-wipes-production-orders-and-products) guard in place first.
-
-### O3. The backend deploy workflow isn't in the repo
-
-- **Severity:** Low
-- **Where:** `.github/workflows/deploy.yml` (missing)
-- **Problem:** [deployment.md](deployment.md#backend-on-the-vps) describes GitHub Actions building the image, pushing it to GHCR and running `docker compose pull`/`up` over SSH, but no workflow exists yet, so pushes to `main` don't deploy the backend.
-- **Fix:** Add the workflow, then remove the "isn't in this repo yet" note from [deployment.md](deployment.md).
 
 ## Tooling
 

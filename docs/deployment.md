@@ -3,7 +3,7 @@
 | Part | Host | Config in repo |
 | --- | --- | --- |
 | Frontend (Next.js) | Vercel | [`vercel.json`](../vercel.json) |
-| Backend (NestJS) | Docker container on a shared VPS, behind Caddy | [`Dockerfile`](../Dockerfile), [`.dockerignore`](../.dockerignore) |
+| Backend (NestJS) | Docker container on a shared VPS, behind Caddy | [`Dockerfile`](../Dockerfile), [`.dockerignore`](../.dockerignore), [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) |
 | Database | Postgres container in the same Docker Compose stack | none. Compose lives on the server |
 
 Why the backend moved off Render and Supabase: [decision 0007](decisions/0007-backend-in-docker-on-shared-vps.md).
@@ -37,7 +37,21 @@ docker run --rm -p 3000:3000 --memory=256m \
 
 ## Backend on the VPS
 
-On a push to `main`, GitHub Actions builds the `Dockerfile`, pushes the image to `ghcr.io/<github-user>/ecom-api`, then SSHes into the VPS and runs `docker compose pull ecom-api && docker compose up -d ecom-api`. The workflow isn't in this repo yet ([O3](issues.md#o3-the-backend-deploy-workflow-isnt-in-the-repo)).
+[`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) deploys the backend on a push to `main` that touches the backend, the shared package, the `Dockerfile`, `.dockerignore`, the root or frontend `package.json`, the lockfile or the workflow itself. It can also be run by hand from the Actions tab. It:
+
+1. Builds the `Dockerfile` for `linux/amd64` and pushes it to `ghcr.io/<github-user>/ecom-api`, tagged `latest` and with the commit SHA. Layers are cached in the GitHub Actions cache.
+2. SSHes into the VPS as `deploy`, then runs `docker compose pull ecom-api && docker compose up -d ecom-api && docker image prune -f` in `~/app`.
+
+It doesn't run migrations (see [Migrations](#migrations)), and only one deploy runs at a time.
+
+The repository needs two Actions secrets. The GHCR push uses the built-in `GITHUB_TOKEN`.
+
+| Secret | Value |
+| --- | --- |
+| `DEPLOY_HOST` | The VPS hostname or IP |
+| `DEPLOY_SSH_KEY` | A private ed25519 key whose public key is in `~deploy/.ssh/authorized_keys` on the VPS |
+
+The workflow trusts whatever host key the VPS presents (`ssh-keyscan`), because the VPS is rebuilt with a new key between uses. If the GHCR package is private, the VPS needs `docker login ghcr.io` with a read-only token. To roll back, point the Compose service at an older `ecom-api:<sha>` tag and run `docker compose up -d ecom-api`.
 
 The container runs:
 
