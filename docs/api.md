@@ -110,7 +110,7 @@ Checkout runs in one transaction. It loads the cart, returns `400 Cart is empty`
 
 `GET /` returns the string `Hello World!`.
 
-`GET /health` returns `200 {"status":"ok"}`. It doesn't touch the database, so it only shows that the process is up. Nothing polls it on the VPS yet ([deployment.md](deployment.md#runtime-constraints)).
+`GET /health` returns `200 {"status":"ok"}`. It doesn't touch the database, so it only shows that the process is up. On the VPS, the container's Compose health check polls it and the deploy waits for it ([deployment.md](deployment.md#runtime-constraints)).
 
 ## Next.js route handlers (BFF)
 

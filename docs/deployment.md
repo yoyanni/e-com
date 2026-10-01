@@ -46,7 +46,7 @@ The parts of the stack that matter to this app:
 | Service | Image | Memory limit | Notes |
 | --- | --- | --- | --- |
 | `caddy` | `caddy:2` | 96 MB | The only service that publishes ports (80 and 443, TCP and UDP). Networks: `web` |
-| `ecom-api` | `ghcr.io/yoyanni/ecom-api:latest` | 256 MB | `restart: unless-stopped`. Starts only after `postgres` passes its health check. Networks: `web`, `db` |
+| `ecom-api` | `ghcr.io/yoyanni/ecom-api:latest` | 256 MB | `restart: unless-stopped`. Starts only after `postgres` passes its health check. Has its own health check on `GET /health`. Networks: `web`, `db` |
 | `postgres` | `postgres:16` | 384 MB | `shared_buffers=128MB`, `max_connections=30`. Data in the `pgdata` volume. Networks: `db` |
 
 The `db` network is `internal`, so Postgres has no route to or from the outside world and no published port. Only `ecom-api` and `docker compose exec` reach it.
@@ -66,7 +66,7 @@ The app refuses to start without `DATABASE_URL`, `JWT_SECRET`, or (in production
 - **TLS:** Caddy serves `ecom-api.<domain>` over HTTPS and proxies plain HTTP to `ecom-api:3000`. It also compresses responses (zstd, gzip), adds `Strict-Transport-Security` and `X-Content-Type-Options: nosniff`, and strips the `Server` header, so the app doesn't need to do any of that. The app has no TLS handling of its own, and the connection to Postgres doesn't use SSL.
 - **Client IPs:** every request reaches the app from Caddy, and the client's address is only in `X-Forwarded-For`. Express doesn't trust that header by default, so anything that keys on the IP (such as rate limiting) sees Caddy's address.
 - **Disk:** none that survives. The VPS is destroyed and rebuilt between uses, so the app logs to stdout only and must not write files. Anything that needs storage goes to external object storage.
-- **Health check:** `GET /health` returns `200 {"status":"ok"}` without touching the database. Nothing polls it yet: the `ecom-api` service has no Compose `healthcheck`, and Caddy doesn't health-check its upstream. The image is Alpine, so a Compose check could use `wget -qO- http://127.0.0.1:3000/health`.
+- **Health check:** `GET /health` returns `200 {"status":"ok"}` without touching the database. The `ecom-api` service's Compose `healthcheck` polls it from inside the container with BusyBox `wget -qO- http://127.0.0.1:3000/health`: every 2 seconds during the 20-second start period, then every 30 seconds, with a 3-second timeout and 3 retries. The result shows in `docker compose ps` and is what the deploy's `--wait` waits for. Compose doesn't restart an unhealthy container, and Caddy doesn't health-check its upstream.
 - **Stopping:** the container runs `node` as PID 1 and the app doesn't handle `SIGTERM`, so every restart waits out Docker's 10-second grace period ([O3](issues.md#o3-the-container-ignores-sigterm)).
 
 ### Database
@@ -86,7 +86,7 @@ docker compose exec postgres psql -U postgres -d ecom
 [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) deploys the backend on a push to `main` that touches the backend, the shared package, the `Dockerfile`, `.dockerignore`, the root or frontend `package.json`, the lockfile or the workflow itself. It can also be run by hand from the Actions tab. It:
 
 1. Builds the `Dockerfile` for `linux/amd64` and pushes it to `ghcr.io/<github-user>/ecom-api`, tagged `latest` and with the commit SHA. Layers are cached in the GitHub Actions cache.
-2. SSHes into the VPS as `deploy`, then runs `docker compose pull ecom-api && docker compose up -d ecom-api && docker image prune -f` in `~/app`.
+2. SSHes into the VPS as `deploy`, then runs `docker compose pull ecom-api && docker compose up -d --wait --wait-timeout 90 ecom-api && docker image prune -f` in `~/app`. `--wait` blocks until the new container passes its health check, and fails the job if it turns unhealthy or 90 seconds pass. The old images are then not pruned, so the previous one is still on the server for a rollback.
 
 It doesn't run migrations (see [Migrations](#migrations)), and only one deploy runs at a time. The service name `ecom-api` and the image name must match the Compose file.
 
@@ -97,7 +97,7 @@ The repository needs two Actions secrets. The GHCR push uses the built-in `GITHU
 | `DEPLOY_HOST` | The VPS hostname or IP |
 | `DEPLOY_SSH_KEY` | A private ed25519 key whose public key is in `~deploy/.ssh/authorized_keys` on the VPS |
 
-The workflow trusts whatever host key the VPS presents (`ssh-keyscan`), because the VPS is rebuilt with a new key between uses. If the GHCR package is private, the VPS needs `docker login ghcr.io` with a read-only token. To roll back, point the Compose service at an older `ecom-api:<sha>` tag and run `docker compose up -d ecom-api`.
+The workflow trusts whatever host key the VPS presents (`ssh-keyscan`), because the VPS is rebuilt with a new key between uses. If the GHCR package is private, the VPS needs `docker login ghcr.io` with a read-only token. To roll back, point the Compose service at an older `ecom-api:<sha>` tag and run `docker compose up -d --wait ecom-api`.
 
 ### Migrations
 

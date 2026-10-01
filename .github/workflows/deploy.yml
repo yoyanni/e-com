@@ -1,4 +1,5 @@
 # Builds the backend image, pushes it to GHCR and restarts it on the VPS.
+# The job fails unless the new container passes its Compose health check.
 # Migrations are not run here (decision 0008). See docs/deployment.md.
 name: Deploy backend
 on:
@@ -53,4 +54,4 @@ jobs:
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
-          ssh "deploy@$DEPLOY_HOST" "cd ~/app && docker compose pull ecom-api && docker compose up -d ecom-api && docker image prune -f"
+          ssh "deploy@$DEPLOY_HOST" "cd ~/app && docker compose pull ecom-api && docker compose up -d --wait --wait-timeout 90 ecom-api && docker image prune -f"
