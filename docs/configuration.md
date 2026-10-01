@@ -6,15 +6,15 @@ Every environment variable the code reads is listed here. The templates are [`ap
 
 | Variable | Required | Default | Used for |
 | --- | --- | --- | --- |
-| `DATABASE_URL` | yes | — | Postgres connection string ([`typeorm.config.ts`](../apps/backend/src/db/typeorm.config.ts)). The app and every migration script refuse to start without it. SSL is off unless the URL asks for it with `sslmode` (for a hosted database such as Supabase, `?sslmode=no-verify` matches the old `rejectUnauthorized: false`). On the VPS, Compose sets it to the `postgres` service, for example `postgresql://ecom:<password>@postgres:5432/ecom` |
+| `DATABASE_URL` | yes | — | Postgres connection string ([`typeorm.config.ts`](../apps/backend/src/db/typeorm.config.ts)). The app and every migration script refuse to start without it. SSL is off unless the URL asks for it with `sslmode` (for a hosted database such as Supabase, `?sslmode=no-verify` matches the old `rejectUnauthorized: false`). On the VPS, Compose sets it to `postgresql://ecom:${ECOM_DB_PASSWORD}@postgres:5432/ecom`, with the password from the `.env` next to the Compose file ([deployment.md](deployment.md#container-environment)) |
 | `JWT_SECRET` | yes | — | Signing and verifying access tokens. The app won't start without it |
-| `NODE_ENV` | no | unset | `production` makes `CORS_ORIGIN` required and loads migrations from `dist/` instead of `src/`. Any other value (`local`, `test`) behaves the same as unset |
-| `PORT` | no | `3001` | HTTP port |
+| `NODE_ENV` | no | unset | `production` makes `CORS_ORIGIN` required and loads migrations from `dist/` instead of `src/`. Any other value (`local`, `test`) behaves the same as unset. Compose sets `production` on the VPS |
+| `PORT` | no | `3001` | HTTP port. Compose sets `3000` on the VPS, which is where Caddy proxies to |
 | `CORS_ORIGIN` | in production | unset | The one allowed CORS origin, with credentials: the exact Vercel URL in production. With `NODE_ENV=production` the app refuses to start without it. Elsewhere, leaving it unset turns CORS off (same-origin only). There's no `*` fallback |
 | `ADMIN_EMAIL` | no | — | Together with `ADMIN_PASSWORD`, creates an admin on startup if missing ([auth.md](auth.md#admin-bootstrap)) |
 | `ADMIN_PASSWORD` | no | — | See `ADMIN_EMAIL` |
 | `ADMIN_NAME` | no | `Admin` | Display name for the admin that gets created |
-| `NODE_OPTIONS` | no | — | Read by Node, not the app. Compose sets `--max-old-space-size=192` on the VPS ([deployment.md](deployment.md#backend-on-the-vps)) |
+| `NODE_OPTIONS` | no | — | Read by Node, not the app. Compose sets `--max-old-space-size=192` on the VPS ([deployment.md](deployment.md#runtime-constraints)) |
 
 ### Which file gets loaded
 
@@ -39,4 +39,4 @@ Next.js loads `.env` for `dev`, `build` and `start`. Both Playwright configs als
 
 ## Adding a variable
 
-Add it to the relevant `.env*.example`, add a row to the table above, and, if production needs it, set it in Vercel or in `env/ecom.env` on the VPS ([deployment.md](deployment.md)). Never bake a value into the Docker image.
+Add it to the relevant `.env*.example`, add a row to the table above, and, if production needs it, set it in Vercel or in `env/ecom.env` on the VPS ([deployment.md](deployment.md#container-environment)). Don't set `NODE_ENV`, `PORT`, `NODE_OPTIONS` or `DATABASE_URL` there: the Compose file sets them, and its values win. Never bake a value into the Docker image.

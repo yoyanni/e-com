@@ -1,6 +1,6 @@
 # Known issues
 
-Compiled on **2026-09-26** by reading the code at v1.2.0. O2 added on **2026-09-27** with the move to the VPS ([deployment.md](deployment.md)). When you fix an item, delete it in the same commit. When a doc turns out not to match the code, add an item here.
+Compiled on **2026-09-26** by reading the code at v1.2.0. O2 added on **2026-09-27** with the move to the VPS ([deployment.md](deployment.md)), and O3 on **2026-09-30** from the server's Compose file. When you fix an item, delete it in the same commit. When a doc turns out not to match the code, add an item here.
 
 **Severity**
 
@@ -70,7 +70,7 @@ IDs by category: **B** bugs, **S** security, **O** operations, **T** tooling. ID
 - **Severity:** Medium
 - **Where:** [auth.controller.ts](../apps/backend/src/auth/auth.controller.ts)
 - **Problem:** `/auth/login` and `/auth/register` accept unlimited attempts, which leaves room for password guessing and account-creation spam.
-- **Fix:** Add `@nestjs/throttler` to the auth routes, then document the limits in [api.md](api.md#auth).
+- **Fix:** Add `@nestjs/throttler` to the auth routes, then document the limits in [api.md](api.md#auth). Every request arrives through Caddy, so also set Express's `trust proxy` to `1` in `main.ts`, or all clients share Caddy's IP and one limit ([deployment.md](deployment.md#runtime-constraints)). Requests from the Vercel route handlers all come from Vercel's IPs, so limit by email as well as by IP.
 
 ## Operations
 
@@ -85,8 +85,15 @@ IDs by category: **B** bugs, **S** security, **O** operations, **T** tooling. ID
 
 - **Severity:** Low
 - **Where:** [seed.ts](../apps/backend/src/db/seeds/seed.ts), [Dockerfile](../Dockerfile)
-- **Problem:** The seed runs through `ts-node` and uses `@faker-js/faker`, which are both dev dependencies and so aren't in the image. `seed:prod` from a laptop can't reach the Compose Postgres, which isn't exposed. A fresh VPS has no way to get sample data.
+- **Problem:** The seed runs through `ts-node` and uses `@faker-js/faker`, which are both dev dependencies and so aren't in the image. `seed:prod` from a laptop can't reach the Compose Postgres, which has no published port and sits on an internal network. A fresh VPS has no way to get sample data.
 - **Fix:** Decide whether the demo needs seed data. If it does, move `@faker-js/faker` to `dependencies` and add a script that runs the compiled `dist/db/seeds/seed.js`, with the [O1](#o1-seedprod-wipes-production-orders-and-products) guard in place first.
+
+### O3. The container ignores `SIGTERM`
+
+- **Severity:** Low
+- **Where:** [main.ts](../apps/backend/src/main.ts), [Dockerfile](../Dockerfile), the `ecom-api` service in the server's `docker-compose.yml`
+- **Problem:** The image runs `node dist/main.js` as PID 1, the app never calls `enableShutdownHooks()`, and the Compose service doesn't set `init: true`. Node running as PID 1 with no `SIGTERM` handler ignores the signal, so every `docker compose up -d ecom-api` (each deploy) and every stop waits Docker's 10-second grace period and then kills the process. The API is down for those extra seconds, and open database connections are dropped instead of closed.
+- **Fix:** Call `app.enableShutdownHooks()` in `main.ts` so Nest closes the HTTP server and the TypeORM pool on `SIGTERM`. Adding `init: true` to the Compose service (or `tini` as the image entrypoint) also forwards signals. Update [deployment.md](deployment.md#runtime-constraints).
 
 ## Tooling
 
