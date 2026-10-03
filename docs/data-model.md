@@ -113,10 +113,10 @@ erDiagram
 
 ## Migrations
 
-[`src/db/typeorm.config.ts`](../apps/backend/src/db/typeorm.config.ts) defines the one `DataSource` that the app, the TypeORM CLI and the seed all use ([decision 0008](decisions/0008-migrations-run-explicitly.md)):
+[`src/db/typeorm.config.ts`](../apps/backend/src/db/typeorm.config.ts) defines the one `DataSource` that the app, the TypeORM CLI and the seed all use ([decision 0009](decisions/0009-deploy-workflow-runs-migrations.md)):
 
 - `synchronize: false`, so entity changes do nothing until you write a migration.
-- **Starting the app never applies migrations.** You run them with a script, in every environment, including tests and production.
+- **Starting the app never applies migrations.** A script applies them in every environment. You run it yourself in development and for the e2e database, and the deploy workflow runs it in production.
 - Migrations are `.js` files. `nest-cli.json` copies them into `dist/`, and they're loaded from `dist/db/migrations` when `NODE_ENV=production` and from `src/db/migrations` otherwise.
 
 ```mermaid
@@ -125,7 +125,7 @@ flowchart LR
   gen --> file["New .js migration<br/>src/db/migrations/"]
   file --> commit["Commit it"]
   commit --> run{"Run a migration script"}
-  run -->|"migration:run:prod<br/>(in the container)"| dist["Load dist/db/migrations"]
+  run -->|"migration:run:prod<br/>(in the container, by the deploy)"| dist["Load dist/db/migrations"]
   run -->|"migration:run / migration:run:test"| src["Load src/db/migrations"]
   dist --> apply[("Pending migrations applied")]
   src --> apply

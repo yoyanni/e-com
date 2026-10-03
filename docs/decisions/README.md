@@ -15,7 +15,8 @@ Short records of choices the code can't explain on its own. Add a record when a 
 | [0005](0005-two-playwright-suites.md) | Two Playwright suites: mocked and smoke | Accepted |
 | [0006](0006-two-layer-route-protection.md) | Protected routes are guarded by `proxy.ts` and by a client `RouteGuard` | Accepted |
 | [0007](0007-backend-in-docker-on-shared-vps.md) | Backend runs as a Docker image on a shared VPS | Accepted |
-| [0008](0008-migrations-run-explicitly.md) | Migrations run by an explicit command, not on startup | Accepted |
+| [0008](0008-migrations-run-explicitly.md) | Migrations run by an explicit command, not on startup | Superseded by 0009 |
+| [0009](0009-deploy-workflow-runs-migrations.md) | The deploy workflow runs migrations before restarting the API | Accepted |
 
 Records 0001–0006 were written after the fact, on 2026-09-26, from the code, code comments and commit messages. Each one's date is the date of the commit that introduced the decision.
 

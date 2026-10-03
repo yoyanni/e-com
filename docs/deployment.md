@@ -86,9 +86,9 @@ docker compose exec postgres psql -U postgres -d ecom
 [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) deploys the backend on a push to `main` that touches the backend, the shared package, the `Dockerfile`, `.dockerignore`, the root or frontend `package.json`, the lockfile or the workflow itself. It can also be run by hand from the Actions tab. It:
 
 1. Builds the `Dockerfile` for `linux/amd64` and pushes it to `ghcr.io/<github-user>/ecom-api`, tagged `latest` and with the commit SHA. Layers are cached in the GitHub Actions cache.
-2. SSHes into the VPS as `deploy`, then runs `docker compose pull ecom-api && docker compose up -d --wait --wait-timeout 90 ecom-api && docker image prune -f` in `~/app`. `--wait` blocks until the new container passes its health check, and fails the job if it turns unhealthy or 90 seconds pass. The old images are then not pruned, so the previous one is still on the server for a rollback.
+2. SSHes into the VPS as `deploy`, then runs `docker compose pull ecom-api && docker compose run --rm -T ecom-api npm run migration:run:prod && docker compose up -d --wait --wait-timeout 90 ecom-api && docker image prune -f` in `~/app`. The `run` step applies pending migrations in a one-off container from the new image (see [Migrations](#migrations)). If it fails, the job fails and the old container keeps serving. `--wait` blocks until the new container passes its health check, and fails the job if it turns unhealthy or 90 seconds pass. The old images are then not pruned, so the previous one is still on the server for a rollback.
 
-It doesn't run migrations (see [Migrations](#migrations)), and only one deploy runs at a time. The service name `ecom-api` and the image name must match the Compose file.
+Only one deploy runs at a time, so two migration runs never overlap. The service name `ecom-api` and the image name must match the Compose file.
 
 The repository needs two Actions secrets. The GHCR push uses the built-in `GITHUB_TOKEN`.
 
@@ -97,17 +97,19 @@ The repository needs two Actions secrets. The GHCR push uses the built-in `GITHU
 | `DEPLOY_HOST` | The VPS hostname or IP |
 | `DEPLOY_SSH_KEY` | A private ed25519 key whose public key is in `~deploy/.ssh/authorized_keys` on the VPS |
 
-The workflow trusts whatever host key the VPS presents (`ssh-keyscan`), because the VPS is rebuilt with a new key between uses. If the GHCR package is private, the VPS needs `docker login ghcr.io` with a read-only token. To roll back, point the Compose service at an older `ecom-api:<sha>` tag and run `docker compose up -d --wait ecom-api`.
+The workflow trusts whatever host key the VPS presents (`ssh-keyscan`), because the VPS is rebuilt with a new key between uses. If the GHCR package is private, the VPS needs `docker login ghcr.io` with a read-only token. To roll back, point the Compose service at an older `ecom-api:<sha>` tag and run `docker compose up -d --wait ecom-api`. That doesn't undo any migration the newer image applied.
 
 ### Migrations
 
-**Starting the container never changes the schema** ([decision 0008](decisions/0008-migrations-run-explicitly.md)). After deploying an image that includes a new migration, and on a fresh database, run from the Compose directory:
+**Starting the container never changes the schema.** The deploy workflow applies pending migrations before it restarts the API ([decision 0009](decisions/0009-deploy-workflow-runs-migrations.md)), with this command from the Compose directory:
 
 ```bash
 docker compose run --rm ecom-api npm run migration:run:prod
 ```
 
-It uses the compiled `dist/db/typeorm.config.js` and the same environment as the service. Until it runs, the app serves against the old schema.
+It uses the compiled `dist/db/typeorm.config.js` and the same environment as the service, and does nothing when no migration is pending. Run it by hand when the schema is behind and no deploy is coming, for example after a restore from an older backup.
+
+Between the migration and the restart, the previous image serves against the new schema. Write migrations that the running code can live with: add columns and tables first, and drop or rename in a later deploy.
 
 ### Seeding
 

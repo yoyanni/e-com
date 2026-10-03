@@ -1,6 +1,6 @@
 # 0008. Migrations run by an explicit command, not on startup
 
-- Status: Accepted
+- Status: Superseded by [0009](0009-deploy-workflow-runs-migrations.md)
 - Date: 2026-09-27
 - Supersedes: [0004](0004-schema-via-migrations-run-on-startup.md)
 

@@ -36,7 +36,7 @@ Read the relevant doc before changing that area, and update it in the same chang
 
 - **Frontend:** Middleware lives in `apps/frontend/proxy.ts`.
 - **Shared package:** after editing `packages/shared/src`, rebuild it. The apps import the compiled `dist/`.
-- **Entities:** after changing an entity, run `npm run migration:generate -w @e-com/backend` and commit the generated `.js` migration. `synchronize` is off, and migrations never run on startup: apply them with `migration:run` (local), `migration:run:test` (e2e DB) or `migration:run:prod` (in the container).
+- **Entities:** after changing an entity, run `npm run migration:generate -w @e-com/backend` and commit the generated `.js` migration. `synchronize` is off, and migrations never run on startup: apply them with `migration:run` (local) or `migration:run:test` (e2e DB). In production the deploy workflow runs `migration:run:prod` in the container before restarting the API, while the old image is still serving, so a migration must not break the code that's already running.
 - **Validation pipe:** the global `ValidationPipe` options in `apps/backend/src/main.ts` are copied in `apps/backend/test/test-helpers.ts`. Change both.
 - **Client-reachable endpoints:** a new backend endpoint that the browser needs also needs a route handler under `apps/frontend/app/api/`. The browser never calls the backend directly.
 - **Protected pages:** a new protected top-level path goes in both `PROTECTED_ROUTES` and `config.matcher` in `proxy.ts`, and the page goes under `app/(protected)/`. Links to it need `prefetch={false}`.
