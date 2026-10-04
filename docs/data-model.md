@@ -152,10 +152,14 @@ npm run migration:revert -w @e-com/backend     # undo the last one
 1. **Deletes** every row in `order_items`, `orders`, `products` and `categories`. Cart items for those products go too, through the cascade.
 2. Inserts 10 categories and 50 products with [faker](https://fakerjs.dev/) data, with random `loremflickr.com` / `picsum.photos` image URLs.
 
+With `--if-empty`, it does nothing when the `products` table has at least one row. The deploy workflow runs it that way ([deployment.md](deployment.md#seeding), [decision 0010](decisions/0010-deploy-seeds-an-empty-database.md)).
+
 It doesn't create any users. For an admin account, see [auth.md](auth.md#admin-bootstrap).
 
-| Script | Env file |
-| --- | --- |
-| `npm run seed:local -w @e-com/backend` | `.env` |
-| `npm run seed:test -w @e-com/backend` | `.env.test` |
-| `npm run seed:prod -w @e-com/backend` | `.env.prod`. **Wipes production orders and products** ([issue O1](issues.md#o1-seedprod-wipes-production-orders-and-products)) |
+| Script | Environment | Runs |
+| --- | --- | --- |
+| `npm run seed:local -w @e-com/backend` | `.env` | `ts-node` and `src/` |
+| `npm run seed:test -w @e-com/backend` | `.env.test` | `ts-node` and `src/` |
+| `seed:prod` | the container's `DATABASE_URL` | the compiled `dist/db/seeds/seed.js`. Needs a build, and it's the only one that works in the production image |
+
+Pass the flag after `--`, for example `npm run seed:local -w @e-com/backend -- --if-empty`.

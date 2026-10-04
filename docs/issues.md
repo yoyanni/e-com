@@ -1,6 +1,6 @@
 # Known issues
 
-Compiled on **2026-09-26** by reading the code at v1.2.0. O2 added on **2026-09-27** with the move to the VPS ([deployment.md](deployment.md)), and O3 on **2026-09-30** from the server's Compose file. When you fix an item, delete it in the same commit. When a doc turns out not to match the code, add an item here.
+Compiled on **2026-09-26** by reading the code at v1.2.0. O3 added on **2026-09-30** from the server's Compose file. When you fix an item, delete it in the same commit. When a doc turns out not to match the code, add an item here.
 
 **Severity**
 
@@ -8,7 +8,7 @@ Compiled on **2026-09-26** by reading the code at v1.2.0. O2 added on **2026-09-
 - **Medium:** a wrong result or error that users or operators will hit, but there's a workaround or the damage is limited.
 - **Low:** rough edges, inconsistencies and latent risks.
 
-**Fix first:** [B1](#b1-checkout-never-decrements-stock), [O1](#o1-seedprod-wipes-production-orders-and-products), [S1](#s1-no-rate-limiting-on-login-and-register).
+**Fix first:** [B1](#b1-checkout-never-decrements-stock), [S1](#s1-no-rate-limiting-on-login-and-register).
 
 IDs by category: **B** bugs, **S** security, **O** operations, **T** tooling. IDs aren't reused.
 
@@ -73,20 +73,6 @@ IDs by category: **B** bugs, **S** security, **O** operations, **T** tooling. ID
 - **Fix:** Add `@nestjs/throttler` to the auth routes, then document the limits in [api.md](api.md#auth). Every request arrives through Caddy, so also set Express's `trust proxy` to `1` in `main.ts`, or all clients share Caddy's IP and one limit ([deployment.md](deployment.md#runtime-constraints)). Requests from the Vercel route handlers all come from Vercel's IPs, so limit by email as well as by IP.
 
 ## Operations
-
-### O1. `seed:prod` wipes production orders and products
-
-- **Severity:** High
-- **Where:** [seed.ts:25](../apps/backend/src/db/seeds/seed.ts#L25), [apps/backend/package.json:25](../apps/backend/package.json#L25)
-- **Problem:** The seed starts by deleting every order, order item, product and category, and through the cascade every cart item. `npm run seed:prod` does this to the production database without asking for confirmation.
-- **Fix:** Refuse to run when `NODE_ENV=production` unless a flag such as `--force` is passed, or remove `seed:prod`. Update [data-model.md](data-model.md#seeding) and [deployment.md](deployment.md).
-
-### O2. The production image can't seed
-
-- **Severity:** Low
-- **Where:** [seed.ts](../apps/backend/src/db/seeds/seed.ts), [Dockerfile](../Dockerfile)
-- **Problem:** The seed runs through `ts-node` and uses `@faker-js/faker`, which are both dev dependencies and so aren't in the image. `seed:prod` from a laptop can't reach the Compose Postgres, which has no published port and sits on an internal network. A fresh VPS has no way to get sample data.
-- **Fix:** Decide whether the demo needs seed data. If it does, move `@faker-js/faker` to `dependencies` and add a script that runs the compiled `dist/db/seeds/seed.js`, with the [O1](#o1-seedprod-wipes-production-orders-and-products) guard in place first.
 
 ### O3. The container ignores `SIGTERM`
 

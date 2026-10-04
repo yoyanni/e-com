@@ -8,9 +8,12 @@ import AppDataSource from '../typeorm.config';
 
 const NUM_CATEGORIES = 10;
 const NUM_PRODUCTS = 50;
+// With --if-empty the seed leaves a database that already has products alone.
+const IF_EMPTY = process.argv.includes('--if-empty');
 
 async function seed() {
-  const { faker } = await import('@faker-js/faker');
+  // The English-only entry: the root one loads every locale.
+  const { faker } = await import('@faker-js/faker/locale/en');
 
   await AppDataSource.initialize();
   console.log(
@@ -21,6 +24,12 @@ async function seed() {
   const productRepo = AppDataSource.getRepository(Product);
   const orderItemRepo = AppDataSource.getRepository(OrderItem);
   const orderRepo = AppDataSource.getRepository(Order);
+
+  if (IF_EMPTY && (await productRepo.count()) > 0) {
+    console.log('Database already has products, skipping seed');
+    await AppDataSource.destroy();
+    return;
+  }
 
   // Clear existing data in FK-safe order
   await orderItemRepo.createQueryBuilder().delete().from(OrderItem).execute();

@@ -86,7 +86,7 @@ docker compose exec postgres psql -U postgres -d ecom
 [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) deploys the backend on a push to `main` that touches the backend, the shared package, the `Dockerfile`, `.dockerignore`, the root or frontend `package.json`, the lockfile or the workflow itself. It can also be run by hand from the Actions tab. It:
 
 1. Builds the `Dockerfile` for `linux/amd64` and pushes it to `ghcr.io/<github-user>/ecom-api`, tagged `latest` and with the commit SHA. Layers are cached in the GitHub Actions cache.
-2. SSHes into the VPS as `deploy`, then runs `docker compose pull ecom-api && docker compose run --rm -T ecom-api npm run migration:run:prod && docker compose up -d --wait --wait-timeout 90 ecom-api && docker image prune -f` in `~/app`. The `run` step applies pending migrations in a one-off container from the new image (see [Migrations](#migrations)). If it fails, the job fails and the old container keeps serving. `--wait` blocks until the new container passes its health check, and fails the job if it turns unhealthy or 90 seconds pass. The old images are then not pruned, so the previous one is still on the server for a rollback.
+2. SSHes into the VPS as `deploy`, then runs `docker compose pull ecom-api && docker compose run --rm -T ecom-api npm run migration:run:prod && docker compose run --rm -T ecom-api npm run seed:prod -- --if-empty && docker compose up -d --wait --wait-timeout 90 ecom-api && docker image prune -f` in `~/app`. The two `run` steps use one-off containers from the new image: the first applies pending migrations (see [Migrations](#migrations)), and the second seeds sample data when there are no products (see [Seeding](#seeding)). If either fails, the job fails and the old container keeps serving. `--wait` blocks until the new container passes its health check, and fails the job if it turns unhealthy or 90 seconds pass. The old images are then not pruned, so the previous one is still on the server for a rollback.
 
 Only one deploy runs at a time, so two migration runs never overlap. The service name `ecom-api` and the image name must match the Compose file.
 
@@ -113,4 +113,12 @@ Between the migration and the restart, the previous image serves against the new
 
 ### Seeding
 
-`npm run seed:prod -w @e-com/backend` can't reach the Compose Postgres from a laptop, and the image can't seed either ([O2](issues.md#o2-the-production-image-cant-seed)). The seed **deletes all orders and products** before inserting sample data ([data-model.md](data-model.md#seeding), [O1](issues.md#o1-seedprod-wipes-production-orders-and-products)).
+Production holds demo data only ([decision 0010](decisions/0010-deploy-seeds-an-empty-database.md)). Every deploy runs the seed with `--if-empty`, so a rebuilt VPS gets sample categories and products on its first deploy, and a database that already has products is left alone.
+
+To reset the demo data by hand, run the seed without the flag from the Compose directory:
+
+```bash
+docker compose run --rm ecom-api npm run seed:prod
+```
+
+That **deletes all orders, products and categories** before inserting new ones, and it creates no users ([data-model.md](data-model.md#seeding)).

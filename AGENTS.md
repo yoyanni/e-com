@@ -40,6 +40,6 @@ Read the relevant doc before changing that area, and update it in the same chang
 - **Validation pipe:** the global `ValidationPipe` options in `apps/backend/src/main.ts` are copied in `apps/backend/test/test-helpers.ts`. Change both.
 - **Client-reachable endpoints:** a new backend endpoint that the browser needs also needs a route handler under `apps/frontend/app/api/`. The browser never calls the backend directly.
 - **Protected pages:** a new protected top-level path goes in both `PROTECTED_ROUTES` and `config.matcher` in `proxy.ts`, and the page goes under `app/(protected)/`. Links to it need `prefetch={false}`.
-- **Seeds:** never run `seed:prod`, and never point `.env.test` at a database that matters. Both wipe data.
+- **Seeds:** every seed script wipes orders, products and categories unless it's passed `--if-empty`. Production holds demo data only, so that's accepted for `seed:prod`, but never point `.env.test` at a database that matters.
 - **Backend runtime (VPS):** the container has a 256 MB limit and a 192 MB heap, and no disk that survives a rebuild. No unbounded queries or in-memory caches, logs to stdout only, no TLS in the app, and never hard-code or bake in secrets, `DATABASE_URL` or CORS origins. The `Dockerfile` copies every workspace's `package.json`, so a new workspace needs adding there.
 - **Docs:** delete an item from `docs/issues.md` in the same commit that fixes it. Don't edit an accepted decision record. Add a new one and mark the old one as superseded. Add any new doc to `docs/README.md` and to the list above.

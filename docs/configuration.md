@@ -22,8 +22,8 @@ Every environment variable the code reads is listed here. The templates are [`ap
 | --- | --- |
 | `.env` | `start`, `start:dev`, `migration:generate`, `migration:run`, `migration:revert`, `seed:local` (through `@nestjs/config` and `dotenv/config`) |
 | `.env.test` | `test:e2e`, `migration:run:test`, `seed:test`, `start:test` (through `node --env-file`) |
-| none | `migration:run:prod`, which runs inside the container and uses its environment |
-| `.env.prod` | `start:prod`, `seed:prod` |
+| none | `migration:run:prod` and `seed:prod`, which run inside the container and use its environment |
+| `.env.prod` | `start:prod` |
 
 `@nestjs/config` and `dotenv` also read `.env` but never overwrite variables that are already set. So when a script runs with `.env.test` or `.env.prod`, any variable **missing** from that file falls back to its value in `.env`. For example, `ADMIN_EMAIL` from `.env` will create an admin in the test database.
 
