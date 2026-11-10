@@ -64,7 +64,8 @@ To show an API error to the user, use [`getApiErrorMessage`](../apps/frontend/li
 
 ## UI
 
-- Tailwind CSS v4 with shadcn/ui components (`radix-nova` style, config in [`components.json`](../apps/frontend/components.json)) in `components/ui/`. Add new ones with the shadcn CLI.
+- Tailwind CSS v4 with shadcn/ui components (`radix-nova` style, config in [`components.json`](../apps/frontend/components.json)) in `components/ui/`. Add new ones with the shadcn CLI (`npx shadcn add <name>` in `apps/frontend`). The CLI (v4) writes `import { cn } from "cn"` and adds the `cn` npm package. Change the import to `@/lib/utils` like the other components and `npm uninstall cn -w @e-com/frontend`.
+- Dropdowns use the shadcn `Select`, not a native `<select>`, so the open list matches the theme. Our copy of [`select.tsx`](../apps/frontend/components/ui/select.tsx) defaults to `position="popper"` (the list opens below the trigger) and indents items like the trigger, so re-adding it with the CLI would undo both. Radix doesn't allow `""` as an item value, so an "any" option needs a stand-in value (see `ALL_CATEGORIES` in [`FilterSidebar.tsx`](../apps/frontend/app/products/FilterSidebar.tsx)).
 - Light/dark/system theme through `next-themes` (`ThemeToggle` in the navbar). The theme tokens are in `app/globals.css`.
 - The font is Inter, from `next/font`.
 - `next/image` only allows remote images from `loremflickr.com` and `picsum.photos` ([`next.config.ts`](../apps/frontend/next.config.ts)), which are the hosts the seed uses. Add any other image host there.

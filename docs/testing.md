@@ -22,6 +22,7 @@ To set up the test database, create an empty Postgres database, copy the templat
 ## Frontend unit tests (Jest + Testing Library)
 
 - These tests live **only** in [`apps/frontend/__tests__/`](../apps/frontend/__tests__), split into `components/`, `hooks/` and `lib/`. `testMatch` doesn't pick up spec files placed next to source files.
+- [`jest.setup.ts`](../apps/frontend/jest.setup.ts) adds jest-dom and no-op `hasPointerCapture`, `releasePointerCapture` and `scrollIntoView`, which Radix `Select` calls and jsdom lacks. To pick an option in a test, click the `combobox`, then the `option`.
 - Shared helpers are in `__tests__/test-utils.tsx` (`renderWithQuery`, `createWrapper` for hooks) and `__tests__/fixtures/mock-data.ts`.
 - Commands: `test`, `test:watch`, `test:coverage`.
 

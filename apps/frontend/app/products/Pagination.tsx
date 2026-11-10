@@ -2,6 +2,13 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const PER_PAGE_OPTIONS = ["12", "24", "48"];
 
@@ -50,17 +57,18 @@ const Pagination = ({ total, page, limit }: PaginationProps) => {
       >
         Next
       </Button>
-      <select
-        value={String(limit)}
-        onChange={(e) => handleChangeLimit(e.target.value)}
-        className="rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-      >
-        {PER_PAGE_OPTIONS.map((n) => (
-          <option key={n} value={n}>
-            {n} / page
-          </option>
-        ))}
-      </select>
+      <Select value={String(limit)} onValueChange={handleChangeLimit}>
+        <SelectTrigger size="sm" aria-label="Products per page">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {PER_PAGE_OPTIONS.map((n) => (
+            <SelectItem key={n} value={n}>
+              {n} / page
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

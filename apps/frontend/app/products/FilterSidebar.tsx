@@ -4,6 +4,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ICategory } from "@e-com/shared";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const SORT_OPTIONS = [
   { value: "newest", label: "Newest" },
@@ -12,8 +19,9 @@ const SORT_OPTIONS = [
   { value: "price_desc", label: "Price: High to Low" },
 ];
 
-const selectClass =
-  "w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2";
+// Radix Select doesn't allow "" as an item value, so "no category filter"
+// needs a stand-in. The underscore keeps it from clashing with a real slug.
+const ALL_CATEGORIES = "_all";
 
 interface FilterSidebarProps {
   categories: ICategory[];
@@ -47,18 +55,24 @@ const FilterSidebar = ({ categories }: FilterSidebarProps) => {
     <aside className="space-y-6">
       <div>
         <p className="mb-2 text-sm font-semibold">Category</p>
-        <select
-          className={selectClass}
-          value={searchParams.get("category") ?? ""}
-          onChange={(e) => handleUpdate("category", e.target.value)}
+        <Select
+          value={searchParams.get("category") ?? ALL_CATEGORIES}
+          onValueChange={(value) =>
+            handleUpdate("category", value === ALL_CATEGORIES ? "" : value)
+          }
         >
-          <option value="">All categories</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.slug}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full" aria-label="Category">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL_CATEGORIES}>All categories</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.slug}>
+                {cat.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div>
@@ -88,17 +102,21 @@ const FilterSidebar = ({ categories }: FilterSidebarProps) => {
 
       <div>
         <p className="mb-2 text-sm font-semibold">Sort</p>
-        <select
-          className={selectClass}
+        <Select
           value={searchParams.get("sort") ?? "newest"}
-          onChange={(e) => handleUpdate("sort", e.target.value)}
+          onValueChange={(value) => handleUpdate("sort", value)}
         >
-          {SORT_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full" aria-label="Sort">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <Button

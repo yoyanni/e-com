@@ -85,8 +85,14 @@ describe("Pagination", () => {
   });
 
   describe("per-page select", () => {
-    it("renders all three per-page options", () => {
+    it("shows the current limit and lists all three options when opened", async () => {
+      const user = userEvent.setup();
       renderWithQuery(<Pagination total={60} page={1} limit={12} />);
+
+      const trigger = screen.getByRole("combobox", { name: "Products per page" });
+      expect(trigger).toHaveTextContent("12 / page");
+
+      await user.click(trigger);
 
       expect(
         screen.getByRole("option", { name: "12 / page" }),
@@ -103,7 +109,10 @@ describe("Pagination", () => {
       const user = userEvent.setup();
       renderWithQuery(<Pagination total={60} page={1} limit={12} />);
 
-      await user.selectOptions(screen.getByRole("combobox"), "24");
+      await user.click(
+        screen.getByRole("combobox", { name: "Products per page" }),
+      );
+      await user.click(screen.getByRole("option", { name: "24 / page" }));
 
       expect(replaceMock).toHaveBeenCalledTimes(1);
       const url = replaceMock.mock.calls[0][0] as string;
