@@ -29,7 +29,8 @@ export class AuthService {
   async getMe(userId: string): Promise<AuthUser | null> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      // A valid token for a deleted user: the session is dead, so 401 rather than 404.
+      throw new UnauthorizedException('User no longer exists');
     }
     return { id: user.id, email: user.email, role: user.role };
   }

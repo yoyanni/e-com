@@ -81,11 +81,11 @@ describe('AuthService', () => {
       });
     });
 
-    it('throws NotFoundException when user does not exist', async () => {
+    it('throws UnauthorizedException when user does not exist', async () => {
       userRepo.findOne.mockResolvedValue(null);
 
       await expect(service.getMe('missing-id')).rejects.toThrow(
-        NotFoundException,
+        UnauthorizedException,
       );
     });
   });

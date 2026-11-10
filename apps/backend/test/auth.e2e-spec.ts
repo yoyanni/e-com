@@ -133,6 +133,20 @@ describe('Auth (e2e)', () => {
     it('401 — no Authorization header', async () => {
       await request(server).get('/auth/me').expect(401);
     });
+
+    it('401 — valid token whose user has been deleted', async () => {
+      const { accessToken } = await registerAndLogin(app, {
+        email: 'user@test.com',
+        password: 'password123',
+        name: 'Test User',
+      });
+      await dataSource.query('TRUNCATE users CASCADE');
+
+      await request(server)
+        .get('/auth/me')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(401);
+    });
   });
 
   describe('POST /auth/refresh', () => {

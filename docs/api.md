@@ -25,6 +25,7 @@ Source: [`auth.controller.ts`](../apps/backend/src/auth/auth.controller.ts)
 - Register returns `409` if the email is taken. Login returns `401 Invalid credentials` for an unknown email or a wrong password.
 - Refresh returns `401` if the token is unknown, expired or already used. Reusing a token revokes its whole family ([auth.md](auth.md#refresh-rotation)).
 - Logout with an unknown token still returns `204`.
+- `/auth/me` returns `401` when the token is valid but its user no longer exists. The other JWT routes don't look the user up, so they keep answering for that token until it expires.
 - Changing your own role returns `400`, and an unknown user id returns `404`.
 
 ### Products
