@@ -27,11 +27,11 @@ const ProductsPage = async ({
   const categories = await fetchCategories();
 
   return (
-    <div className="mt-4 mx-auto max-w-7xl">
+    <div className="mt-4 mx-auto w-full max-w-7xl">
       <h1 className="mb-6 text-2xl font-bold">
         {params.search ? `Results for "${params.search}"` : "All Products"}
       </h1>
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
         <FilterSidebar categories={categories} />
         <Suspense fallback={<ProductGridSkeleton />}>
           <ProductGrid searchParams={params} />
