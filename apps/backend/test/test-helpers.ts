@@ -29,10 +29,37 @@ export async function createApp(): Promise<{
 
   const dataSource = app.get(DataSource);
 
+  try {
+    await assertTestDatabase(dataSource);
+  } catch (error) {
+    await app.close();
+    throw error;
+  }
+
   return { app, dataSource };
 }
 
+/**
+ * The e2e suite truncates every table before every test. Refuse to touch a
+ * database whose name doesn't end in `_test`, so that running jest without
+ * `--env-file=.env.test` (which falls back to `.env`) can't wipe the dev database.
+ */
+async function assertTestDatabase(dataSource: DataSource): Promise<void> {
+  const [{ name }] = await dataSource.query<{ name: string }[]>(
+    'SELECT current_database() AS name',
+  );
+  if (!name.endsWith('_test')) {
+    throw new Error(
+      `\n\n*** REFUSING TO RUN E2E TESTS AGAINST DATABASE "${name}" ***\n` +
+        'The e2e suite truncates every table, and it only runs against a database whose name ends in "_test".\n' +
+        'Jest was probably started without apps/backend/.env.test, so DATABASE_URL came from .env.\n' +
+        'Run the suite with `npm run test:e2e:backend`.\n',
+    );
+  }
+}
+
 export async function truncateTables(dataSource: DataSource): Promise<void> {
+  await assertTestDatabase(dataSource);
   await dataSource.query(
     'TRUNCATE cart_items, order_items, orders, refresh_tokens, users, products, categories RESTART IDENTITY CASCADE',
   );
