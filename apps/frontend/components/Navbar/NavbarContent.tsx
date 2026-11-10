@@ -1,52 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { SubmitEvent, useRef } from "react";
+import { Suspense } from "react";
 import { ShoppingCart } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
+import { SearchForm, SearchFormFallback } from "./SearchForm";
 
-export function NavbarContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { isAuthenticated, logoutMutation } = useAuth();
+// Shown until /api/auth/me answers, so a logged-in user never sees
+// Login/Register first. Sized like Account/Logout (73px and 64px); Login and
+// Register come to 8px less in total.
+function AuthActionsPlaceholder() {
+  return (
+    <div className="flex items-center gap-2" aria-hidden>
+      <div className="h-7 w-[4.5rem] animate-pulse rounded-lg bg-muted" />
+      <div className="h-7 w-16 animate-pulse rounded-lg bg-muted" />
+    </div>
+  );
+}
+
+interface NavbarContentProps {
+  // The hero nav on the home page leaves the search box out.
+  showSearch?: boolean;
+}
+
+export function NavbarContent({ showSearch = true }: NavbarContentProps) {
+  const { isLoading, isAuthenticated, logoutMutation } = useAuth();
   const { cartItems } = useCart();
   const itemCount = isAuthenticated
     ? cartItems.reduce((n, i) => n + i.quantity, 0)
     : 0;
 
-  function handleSearch(e: SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const query = inputRef.current?.value.trim() ?? "";
-    const params = new URLSearchParams(searchParams.toString());
-    if (query) {
-      params.set("search", query);
-    } else {
-      params.delete("search");
-    }
-    params.delete("page"); // reset pagination on new search
-    router.push(`/products?${params.toString()}`);
-  }
-
   return (
     <>
-      <form onSubmit={handleSearch} className="flex flex-1 items-center gap-2">
-        <Input
-          ref={inputRef}
-          type="search"
-          placeholder="Search products…"
-          defaultValue={searchParams.get("search") ?? ""}
-          className="h-8 max-w-sm"
-          aria-label="Search products"
-        />
-      </form>
+      {showSearch && (
+        <Suspense fallback={<SearchFormFallback />}>
+          <SearchForm />
+        </Suspense>
+      )}
 
       <nav className="ml-auto flex items-center gap-2">
         <ThemeToggle />
@@ -65,7 +60,9 @@ export function NavbarContent() {
           </Link>
         </Button>
 
-        {isAuthenticated ? (
+        {isLoading ? (
+          <AuthActionsPlaceholder />
+        ) : isAuthenticated ? (
           <>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/account/orders" prefetch={false}>

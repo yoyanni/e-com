@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { NavbarContent } from "./NavbarContent";
@@ -38,16 +38,15 @@ export function Navbar() {
         visible ? "translate-y-0" : "-translate-y-full",
       )}
     >
-      <div className="container mx-auto flex h-14 items-center gap-4 px-4">
+      {/* Equal outer columns keep the search box centred in the header. */}
+      <div className="container mx-auto grid h-14 grid-cols-[1fr_minmax(0,28rem)_1fr] items-center xl:grid-cols-[1fr_minmax(0,36rem)_1fr] gap-4 px-4">
         <Link
           href="/"
-          className="mr-4 shrink-0 text-lg font-bold tracking-tight"
+          className="justify-self-start whitespace-nowrap text-lg font-bold tracking-tight"
         >
           E-com
         </Link>
-        <Suspense>
-          <NavbarContent />
-        </Suspense>
+        <NavbarContent />
       </div>
     </header>
   );

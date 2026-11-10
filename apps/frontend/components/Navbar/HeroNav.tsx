@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense } from "react";
 
 import { NavbarContent } from "./NavbarContent";
 
@@ -15,9 +14,7 @@ export function HeroNav() {
         >
           E-com
         </Link>
-        <Suspense>
-          <NavbarContent />
-        </Suspense>
+        <NavbarContent showSearch={false} />
       </div>
     </div>
   );

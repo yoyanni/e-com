@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Navbar } from "@/components/Navbar";
+import { HeroNav } from "@/components/Navbar/HeroNav";
 import { renderWithQuery, mockCartItem } from "../test-utils";
 
 // Mocks
@@ -30,6 +31,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   // Safe defaults — override per test as needed
   mockUseAuth.mockReturnValue({
+    isLoading: false,
     isAuthenticated: false,
     logoutMutation: { mutate: logoutMutateMock, isPending: false },
   });
@@ -49,6 +51,7 @@ describe("Navbar", () => {
 
     it("shows the summed quantity across all cart items", async () => {
       mockUseAuth.mockReturnValue({
+        isLoading: false,
         isAuthenticated: true,
         logoutMutation: { mutate: logoutMutateMock, isPending: false },
       });
@@ -70,6 +73,7 @@ describe("Navbar", () => {
 
     it("caps the badge at 99+", async () => {
       mockUseAuth.mockReturnValue({
+        isLoading: false,
         isAuthenticated: true,
         logoutMutation: { mutate: logoutMutateMock, isPending: false },
       });
@@ -82,6 +86,32 @@ describe("Navbar", () => {
       expect(
         await screen.findByLabelText("100 items in cart"),
       ).toHaveTextContent("99+");
+    });
+  });
+
+  describe("loading state (isLoading = true)", () => {
+    beforeEach(() => {
+      mockUseAuth.mockReturnValue({
+        isLoading: true,
+        isAuthenticated: false,
+        logoutMutation: { mutate: logoutMutateMock, isPending: false },
+      });
+    });
+
+    it("shows neither the guest nor the account actions", () => {
+      renderWithQuery(<Navbar />);
+
+      expect(screen.queryByRole("link", { name: /login/i })).toBeNull();
+      expect(screen.queryByRole("link", { name: /register/i })).toBeNull();
+      expect(screen.queryByRole("link", { name: /account/i })).toBeNull();
+      expect(screen.queryByRole("button", { name: /logout/i })).toBeNull();
+    });
+
+    it("still shows the search box and cart link", () => {
+      renderWithQuery(<Navbar />);
+
+      expect(screen.getByLabelText("Search products")).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /cart/i })).toBeInTheDocument();
     });
   });
 
@@ -106,6 +136,7 @@ describe("Navbar", () => {
   describe("authenticated state (isAuthenticated = true)", () => {
     beforeEach(() => {
       mockUseAuth.mockReturnValue({
+        isLoading: false,
         isAuthenticated: true,
         logoutMutation: { mutate: logoutMutateMock, isPending: false },
       });
@@ -137,5 +168,15 @@ describe("Navbar", () => {
 
       expect(logoutMutateMock).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe("HeroNav", () => {
+  it("leaves out the search box but keeps the cart and auth actions", () => {
+    renderWithQuery(<HeroNav />);
+
+    expect(screen.queryByLabelText("Search products")).toBeNull();
+    expect(screen.getByRole("link", { name: /cart/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /login/i })).toBeInTheDocument();
   });
 });

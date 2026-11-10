@@ -6,7 +6,7 @@ This covers the Next.js 16 App Router app in [`apps/frontend/`](../apps/frontend
 
 | Path | Access | Rendering | Notes |
 | --- | --- | --- | --- |
-| `/` | public | server | Hero section with its own nav (`HeroNav`). The main `Navbar` stays hidden until the hero scrolls out of view |
+| `/` | public | server | Hero section with its own nav (`HeroNav`), which has no search box. The main `Navbar` stays hidden until the hero scrolls out of view |
 | `/products` | public | server + client filters | See [Product listing](#product-listing) |
 | `/products/[slug]` | public | server + client add-to-cart | `generateMetadata` for title/OG tags. If the fetch fails, it shows `notFound()` |
 | `/login`, `/register` | guest only | client form | `(guest)` group |
@@ -43,7 +43,7 @@ This means stock and price changes can take up to a minute to show on product pa
 
 | Hook | Query key | Provides |
 | --- | --- | --- |
-| [`useAuth`](../apps/frontend/hooks/useAuth.ts) | `["me"]` | `user`, `isAuthenticated`, and the login, register and logout mutations |
+| [`useAuth`](../apps/frontend/hooks/useAuth.ts) | `["me"]` | `user`, `isAuthenticated`, `isLoading`, and the login, register and logout mutations |
 | [`useCart`](../apps/frontend/hooks/useCart.ts) | `["cart"]` | `cartItems`, `subtotal`, and the add, update and remove mutations |
 | [`useOrders`](../apps/frontend/hooks/useOrders.ts) | `["orders"]` | Order list. `useOrder(id)` uses `["orders", id]` |
 | [`useCheckout`](../apps/frontend/hooks/useCheckout.ts) | — | `checkoutMutation`. On success it invalidates cart and orders and goes to `/checkout/success` |
@@ -53,6 +53,10 @@ The query keys are exported as constants (`ME_QUERY_KEY`, `CART_QUERY_KEY`, `ORD
 The cart mutations are **optimistic**. `onMutate` updates the cache (a new line gets a temporary `optimistic-<productId>` id), `onError` restores the snapshot, and `onSettled` refetches.
 
 The navbar calls `useCart` and `useAuth` on every page, so a logged-out visitor makes `/api/cart` and `/api/auth/me` calls, and a refresh attempt, that all return `401`. That's expected. The cart badge is hidden when there's no user.
+
+Until `["me"]` has its first answer, `useAuth().isLoading` is true and the navbar shows two grey placeholders where the account buttons go, so a logged-in visitor never sees Login/Register first. `isLoading` is already true during server rendering (TanStack Query reports the fetch it will start on mount), so the server HTML and the first client render match.
+
+The navbar search box ([`SearchForm`](../apps/frontend/components/Navbar/SearchForm.tsx)) is the only part of the navbar that calls `useSearchParams`, so it sits in its own `<Suspense>` with a read-only fallback of the same size. The main `Navbar` is a three-column grid with equal outer columns, which keeps the search box centred in the header at up to 28rem wide, or 36rem from the `xl` breakpoint (1280px). Below that there isn't room for 36rem and the logged-in buttons with the box still centred. On prerendered pages (`/`, `/login`, …), `useSearchParams` renders everything up to the nearest `<Suspense>` on the client only. The tight boundary keeps the theme toggle, cart link and account placeholders in the HTML.
 
 `QueryClient` defaults are set in [`components/Providers.tsx`](../apps/frontend/components/Providers.tsx): `staleTime` 5 min, `retry` 1, no refetch on window focus. `useAuth` overrides the last one. React Query Devtools are mounted.
 

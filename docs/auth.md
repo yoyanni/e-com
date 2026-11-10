@@ -50,7 +50,7 @@ Every other `/api/*` handler reads `accessToken` and sends it to the backend as 
 ## Frontend flow
 
 - **Silent refresh.** When a request returns `401`, the axios interceptor in [`api/client.ts`](../apps/frontend/api/client.ts) calls `POST /api/auth/refresh` and retries the request once. Concurrent `401`s share one in-flight refresh. If the refresh fails, the error is passed on and nothing redirects.
-- **Current user.** `useAuth` ([`hooks/useAuth.ts`](../apps/frontend/hooks/useAuth.ts)) queries `["me"]` through `/api/auth/me`. Any failure resolves to `null`, which means logged out.
+- **Current user.** `useAuth` ([`hooks/useAuth.ts`](../apps/frontend/hooks/useAuth.ts)) queries `["me"]` through `/api/auth/me`. Any failure resolves to `null`, which means logged out. Until the first answer, `isLoading` is true and the navbar shows placeholders instead of either set of buttons ([frontend.md](frontend.md#data-fetching)).
 - **Login and register.** After login, `useAuth` invalidates `me` and `cart` and calls `router.refresh()`, which lets `proxy.ts` redirect the user back to `redirectTo`. After register, it goes to `/products`.
 - **Logout** clears the whole query cache and goes to `/`.
 
