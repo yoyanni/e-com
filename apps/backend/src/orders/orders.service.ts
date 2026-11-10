@@ -64,6 +64,7 @@ export class OrdersService {
     return this.ordersRepository.find({
       where: { userId },
       relations: ['items', 'items.product'],
+      order: { createdAt: 'DESC' },
     });
   }
 

@@ -42,13 +42,6 @@ IDs by category: **B** bugs, **S** security, **O** operations, **T** tooling. ID
 - **Problem:** Postgres `numeric` reaches clients as a string ([data-model.md](data-model.md#money)). Any code that trusts the `number` type and uses `+` will concatenate strings instead of adding. The backend also adds up the checkout total in JS floating point.
 - **Fix:** Either add a TypeORM column transformer that parses to number, or type the fields as `string` and keep converting where they're used. Calculate totals in cents or in SQL.
 
-### B6. Order history isn't sorted
-
-- **Severity:** Low
-- **Where:** [orders.service.ts:63](../apps/backend/src/orders/orders.service.ts#L63)
-- **Problem:** `GET /orders` has no `order`, so `/account/orders` lists orders in whatever order Postgres returns them.
-- **Fix:** Add `order: { createdAt: 'DESC' }`.
-
 ### B7. Failed logout leaves the session in place
 
 - **Severity:** Low

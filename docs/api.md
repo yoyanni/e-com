@@ -101,7 +101,7 @@ Every route needs JWT and only sees the caller's own orders.
 | Method | Path | Success |
 | --- | --- | --- |
 | `POST` | `/orders/checkout` | `201` the new order (without `items`) |
-| `GET` | `/orders` | `200` array of orders with `items[].product` |
+| `GET` | `/orders` | `200` array of orders with `items[].product`, newest first |
 | `GET` | `/orders/:id` | `200` one order with `items[].product`, `404` if missing |
 
 Checkout runs in one transaction. It loads the cart, returns `400 Cart is empty` or `400 Some items are out of stock` (when any line's quantity is more than the product's stock), and otherwise creates the order with status `pending` and `unitPrice` copied from the current product price. Then it deletes the cart items. It does **not** reduce stock ([issue B1](issues.md#b1-checkout-never-decrements-stock)).

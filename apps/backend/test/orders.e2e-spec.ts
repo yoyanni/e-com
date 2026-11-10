@@ -170,6 +170,37 @@ describe('Orders (e2e)', () => {
       });
     });
 
+    it('200 — returns the newest order first', async () => {
+      const { accessToken } = await registerAndLogin(app, {
+        email: 'user@test.com',
+        password: 'password123',
+        name: 'User',
+      });
+      const product = await seedProduct(dataSource);
+
+      const orderIds: string[] = [];
+      for (let i = 0; i < 3; i++) {
+        await request(server)
+          .post('/cart')
+          .set('Authorization', `Bearer ${accessToken}`)
+          .send({ productId: product.id, quantity: 1 });
+        const checkout = await request(server)
+          .post('/orders/checkout')
+          .set('Authorization', `Bearer ${accessToken}`)
+          .expect(201);
+        orderIds.push((checkout.body as { id: string }).id);
+      }
+
+      const res = await request(server)
+        .get('/orders')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(200);
+
+      expect((res.body as { id: string }[]).map((o) => o.id)).toEqual(
+        orderIds.reverse(),
+      );
+    });
+
     it('200 — only returns the authenticated user orders', async () => {
       const userA = await registerAndLogin(app, {
         email: 'usera@test.com',

@@ -13,7 +13,7 @@ This covers the Next.js 16 App Router app in [`apps/frontend/`](../apps/frontend
 | `/cart` | protected | client | `(protected)` group |
 | `/checkout` | protected | client | Order summary and "Place order" |
 | `/checkout/success?orderId=` | protected | server | Confirmation that only shows the id from the query string |
-| `/account/orders` | protected | client | Order history |
+| `/account/orders` | protected | client | Order history, newest first (the order `GET /orders` returns) |
 | `/account/orders/[id]` | protected | client | Order detail with a status badge |
 
 `app/products/error.tsx` and `app/products/[slug]/error.tsx` show a friendly message when the backend can't be reached. How guest-only and protected access is enforced is described in [auth.md](auth.md#route-protection).

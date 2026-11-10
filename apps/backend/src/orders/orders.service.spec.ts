@@ -154,7 +154,7 @@ describe('OrdersService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all orders for the user', async () => {
+    it('should return all orders for the user, newest first', async () => {
       const orders = [mockOrder, { id: 'order-2', userId, total: 100 }];
       ordersRepo.find.mockResolvedValue(orders);
 
@@ -163,6 +163,7 @@ describe('OrdersService', () => {
       expect(ordersRepo.find).toHaveBeenCalledWith({
         where: { userId },
         relations: ['items', 'items.product'],
+        order: { createdAt: 'DESC' },
       });
       expect(result).toEqual(orders);
     });
