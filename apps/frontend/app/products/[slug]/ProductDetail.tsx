@@ -2,11 +2,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import axios from "axios";
 import { IProduct } from "@e-com/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
+import { getApiErrorMessage } from "@/lib/getApiErrorMessage";
+
+const isUnauthorized = (error: unknown) =>
+  axios.isAxiosError(error) && error.response?.status === 401;
 
 interface ProductDetailProps {
   product: IProduct;
@@ -31,15 +38,39 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
   const [quantity, setQuantity] = useState(1);
   const max = Math.min(product.stock, 99);
   const { addMutation } = useCart();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const price = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(Number(product.price));
 
+  const goToLogin = () =>
+    router.push(`/login?redirectTo=${encodeURIComponent(pathname)}`);
+
   const handleAddToCart = () => {
-    addMutation.mutate({ productId: product.id, quantity });
+    // Known guest: go straight to login. While /api/auth/me is still loading,
+    // try anyway; a 401 (guest, or an expired session) also lands on login.
+    if (!isAuthLoading && !isAuthenticated) {
+      goToLogin();
+      return;
+    }
+    addMutation.mutate(
+      { productId: product.id, quantity },
+      {
+        onError: (error) => {
+          if (isUnauthorized(error)) goToLogin();
+        },
+      },
+    );
   };
+
+  const addError =
+    addMutation.isError && !isUnauthorized(addMutation.error)
+      ? getApiErrorMessage(addMutation.error)
+      : null;
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
@@ -123,6 +154,12 @@ const ProductDetail = ({ product }: ProductDetailProps) => {
                 : "Add to cart"}
           </Button>
         </div>
+
+        {addError && (
+          <p role="alert" className="text-sm text-red-600">
+            {addError}
+          </p>
+        )}
       </div>
     </div>
   );

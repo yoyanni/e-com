@@ -28,13 +28,6 @@ IDs by category: **B** bugs, **S** security, **O** operations, **T** tooling. ID
 - **Problem:** `GET /orders/abc` (or the other two routes) sends `abc` to Postgres as a `uuid`, which throws, and the client gets `500` instead of `400` or `404`. The frontend's `/account/orders/[id]` passes any URL segment straight through.
 - **Fix:** Add `ParseUUIDPipe` as the cart controller does.
 
-### B3. Add to cart fails silently when logged out
-
-- **Severity:** Medium
-- **Where:** [ProductDetail.tsx:40](../apps/frontend/app/products/[slug]/ProductDetail.tsx#L40)
-- **Problem:** A guest clicks "Add to cart". The optimistic update shows briefly, `/api/cart` returns `401`, the refresh also fails, and the cart rolls back. There's no message and no redirect to login.
-- **Fix:** When `useAuth().isAuthenticated` is false, send the user to `/login?redirectTo=<current path>`, and show `addMutation.error`.
-
 ### B4. Checkout shows the generic Axios error message
 
 - **Severity:** Low
@@ -62,6 +55,13 @@ IDs by category: **B** bugs, **S** security, **O** operations, **T** tooling. ID
 - **Where:** [useAuth.ts:42](../apps/frontend/hooks/useAuth.ts#L42), [app/api/auth/[action]/route.ts](../apps/frontend/app/api/auth/[action]/route.ts)
 - **Problem:** Cookies are only cleared after the backend returns success, and the query cache is only cleared in `onSuccess`. If the `refreshToken` cookie is missing or the backend is down, the user stays logged in on the client.
 - **Fix:** Always delete both cookies in the logout handler, and clear the cache in `onSettled`.
+
+### B9. A rejected `accessToken` cookie blocks the login page
+
+- **Severity:** Low
+- **Where:** [proxy.ts:35](../apps/frontend/proxy.ts#L35), [app/api/auth/[action]/route.ts:54](../apps/frontend/app/api/auth/[action]/route.ts#L54)
+- **Problem:** `proxy.ts` treats any `accessToken` cookie as logged in and redirects `/login` and `/register` to `redirectTo`. If the backend rejects that token and the refresh fails too, nothing deletes the cookie: the refresh handler passes the error on and leaves both cookies in place. Until the cookie expires (up to 15 minutes, `ACCESS_TOKEN_TTL_SECONDS`), the login page can't be opened. Add to cart and `RouteGuard` send the user to `/login?redirectTo=…`, which comes straight back; on `/cart` that ends on a blank page, because `RouteGuard` renders nothing without a user. It takes a token the backend stops accepting before it expires, for example after `JWT_SECRET` changes, or locally after pointing the frontend at a different backend.
+- **Fix:** Delete both cookies in the refresh handler when the backend answers `401` or there's no `refreshToken` cookie. The next `/login` request then gets past `proxy.ts`. Update [auth.md](auth.md#route-protection).
 
 ## Security
 

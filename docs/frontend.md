@@ -8,7 +8,7 @@ This covers the Next.js 16 App Router app in [`apps/frontend/`](../apps/frontend
 | --- | --- | --- | --- |
 | `/` | public | server | Hero section with its own nav (`HeroNav`), which has no search box. The main `Navbar` stays hidden until the hero scrolls out of view |
 | `/products` | public | server + client filters | See [Product listing](#product-listing) |
-| `/products/[slug]` | public | server + client add-to-cart | `generateMetadata` for title/OG tags. If the fetch fails, it shows `notFound()` |
+| `/products/[slug]` | public | server + client add-to-cart | `generateMetadata` for title/OG tags. If the fetch fails, it shows `notFound()`. Add to cart sends guests to login ([auth.md](auth.md#frontend-flow)) |
 | `/login`, `/register` | guest only | client form | `(guest)` group |
 | `/cart` | protected | client | `(protected)` group |
 | `/checkout` | protected | client | Order summary and "Place order" |

@@ -53,6 +53,7 @@ Every other `/api/*` handler reads `accessToken` and sends it to the backend as 
 - **Current user.** `useAuth` ([`hooks/useAuth.ts`](../apps/frontend/hooks/useAuth.ts)) queries `["me"]` through `/api/auth/me`. Any failure resolves to `null`, which means logged out. Until the first answer, `isLoading` is true and the navbar shows placeholders instead of either set of buttons ([frontend.md](frontend.md#data-fetching)).
 - **Login and register.** After login, `useAuth` invalidates `me` and `cart` and calls `router.refresh()`, which lets `proxy.ts` redirect the user back to `redirectTo`. After register, it goes to `/products`.
 - **Logout** clears the whole query cache and goes to `/`.
+- **Add to cart** ([`ProductDetail.tsx`](../apps/frontend/app/products/[slug]/ProductDetail.tsx)) sends a known guest to `/login?redirectTo=<product page>` without calling the API. While `useAuth` is still loading it tries the add, and a `401` from it (a guest, or a session that can't be refreshed) goes to the same login URL. Other errors show the API's message under the button.
 
 ## Route protection
 
@@ -62,6 +63,6 @@ Protection has two layers ([decision 0006](decisions/0006-two-layer-route-protec
    - `/cart`, `/checkout`, `/account` with neither cookie → redirect to `/login?redirectTo=<path>`.
    - `/login`, `/register` with an `accessToken` cookie → redirect to `redirectTo` if it's a same-site path, otherwise to `/products`.
    - The protected prefixes are listed in `PROTECTED_ROUTES` **and** in `config.matcher`. Keep the two lists in sync.
-2. **[`RouteGuard`](../apps/frontend/components/RouteGuard.tsx)**, which wraps everything in `app/(protected)/`, waits for `useAuth`. It shows a spinner while loading and, if there's no user, does `router.replace("/login?redirectTo=…")`. This catches cookies that exist but aren't valid any more.
+2. **[`RouteGuard`](../apps/frontend/components/RouteGuard.tsx)**, which wraps everything in `app/(protected)/`, waits for `useAuth`. It shows a spinner while loading and, if there's no user, does `router.replace("/login?redirectTo=…")`. This catches a leftover `refreshToken` cookie that can't be used any more. It doesn't catch an `accessToken` cookie the backend rejects: while that cookie exists, `proxy.ts` sends `/login` straight back ([B9](issues.md#b9-a-rejected-accesstoken-cookie-blocks-the-login-page)).
 
 Links to protected pages use `prefetch={false}`, so a prefetched page can't be served from a stale cache after logout.
