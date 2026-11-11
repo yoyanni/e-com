@@ -1,6 +1,6 @@
 # Known issues
 
-Compiled on **2026-09-26** by reading the code at v1.2.0. O3 added on **2026-09-30** from the server's Compose file. When you fix an item, delete it in the same commit. When a doc turns out not to match the code, add an item here.
+Compiled on **2026-09-26** by reading the code at v1.2.0. O3 added on **2026-09-30** from the server's Compose file, and O4 on **2026-11-11** from a deploy run's warnings. When you fix an item, delete it in the same commit. When a doc turns out not to match the code, add an item here.
 
 **Severity**
 
@@ -73,6 +73,13 @@ IDs by category: **B** bugs, **S** security, **O** operations, **T** tooling. ID
 - **Where:** [main.ts](../apps/backend/src/main.ts), [Dockerfile](../Dockerfile), the `ecom-api` service in the server's `docker-compose.yml`
 - **Problem:** The image runs `node dist/main.js` as PID 1, the app never calls `enableShutdownHooks()`, and the Compose service doesn't set `init: true`. Node running as PID 1 with no `SIGTERM` handler ignores the signal, so every `docker compose up -d ecom-api` (each deploy) and every stop waits Docker's 10-second grace period and then kills the process. The API is down for those extra seconds, and open database connections are dropped instead of closed.
 - **Fix:** Call `app.enableShutdownHooks()` in `main.ts` so Nest closes the HTTP server and the TypeORM pool on `SIGTERM`. Adding `init: true` to the Compose service (or `tini` as the image entrypoint) also forwards signals. Update [deployment.md](deployment.md#runtime-constraints).
+
+### O4. The deploy workflow's actions target the deprecated Node.js 20
+
+- **Severity:** Low
+- **Where:** [deploy.yml:34-41](../.github/workflows/deploy.yml#L34-L41)
+- **Problem:** `actions/checkout@v4`, `docker/setup-buildx-action@v3`, `docker/login-action@v3` and `docker/build-push-action@v6` are built for Node.js 20, which GitHub has deprecated. The runner forces them onto Node.js 24 and adds a warning to every deploy run. They still work (the 1.4.0 deploy passed), but they run on a Node version they weren't built for. This is the only workflow, so if a runner change breaks one of them, backend releases stop until it's fixed.
+- **Fix:** Move to the current major versions, which target Node.js 24: `actions/checkout@v7`, `docker/setup-buildx-action@v4`, `docker/login-action@v4` and `docker/build-push-action@v7` (the latest releases on 2026-11-11). Check each one's release notes for breaking changes in the majors being skipped. Then run the workflow by hand from the Actions tab and check that the warning is gone.
 
 ## Tooling
 
