@@ -18,6 +18,7 @@ Short records of choices the code can't explain on its own. Add a record when a 
 | [0008](0008-migrations-run-explicitly.md) | Migrations run by an explicit command, not on startup | Superseded by 0009 |
 | [0009](0009-deploy-workflow-runs-migrations.md) | The deploy workflow runs migrations before restarting the API | Accepted |
 | [0010](0010-deploy-seeds-an-empty-database.md) | Production data is disposable, and the deploy seeds an empty database | Accepted |
+| [0011](0011-demo-is-noindex.md) | The demo store tells search engines not to index it | Accepted |
 
 Records 0001–0006 were written after the fact, on 2026-09-26, from the code, code comments and commit messages. Each one's date is the date of the commit that introduced the decision.
 
